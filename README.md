@@ -10,9 +10,9 @@ It works by reading some kind of ID string (a student number, for example), indi
 
 The ID can be entered from a keyboard or any other external input device, such as an RFID reader.
 
-##Updates
+## Updates
 
-###Falcon
+### Falcon
 
 *Updated July 2016*
 
@@ -20,8 +20,9 @@ The ID can be entered from a keyboard or any other external input device, such a
 * Custom settings screen for use with any installation of CareerHub
 * Improved performance through use of CareerHub Integrations API
 * Improved performance through better API token management
+* A simple counting mode for when recording the IDs isn't important
 
-###Eagle
+### Eagle
 
 *Updated July 2015*
 
@@ -29,7 +30,7 @@ The ID can be entered from a keyboard or any other external input device, such a
 * Improved error messages
 * Maximum entry slots increased from three to five
 
-###Dunlin
+### Dunlin
 
 *Updated November 2014*
 
@@ -39,7 +40,7 @@ The ID can be entered from a keyboard or any other external input device, such a
 * Keyboard shortcut (Ctrl+t) toggles online mode (Ctrl+r now toggles booking mode)
 * Network requests won't timeout
 
-###Condor
+### Condor
 
 *Updated June 2014*
 
@@ -54,7 +55,7 @@ The ID can be entered from a keyboard or any other external input device, such a
 * All the previous functionality of Buzzard remains in an 'offline mode'
 * EventSwipe will automatically switch to offline mode if there are any errors connecting to the internet or CareerHub
 
-###Buzzard
+### Buzzard
 
 *Updated January 2014*
 
@@ -66,22 +67,22 @@ The ID can be entered from a keyboard or any other external input device, such a
 * Keyboard shortcut (Ctrl+s) for saving
 * Exit confirmation dialogue if there are unsaved records
 
-##Installation
+## Installation
 
-###Requirements
+### Requirements
 
 * Any device capable of running a Java application.
 * A way of distinguishing event attendees with unique and easily accessible IDs. For example, student numbers which can be read from student cards via a magnetic strip or RFID chip.
 
-###Instructions
+### Instructions
 
 * [Download EventSwipe.jar and lib.zip](https://bitbucket.org/mattwildman/eventswipe/downloads)
 * Extract the contents of lib.zip and save in the same folder as EventSwipe.jar
 * Open EventSwipe.jar and got to file > settings and enter your installation specific settings
 
-##Usage
+## Usage
 
-###Preparing the booking lists
+### Preparing the booking lists
 
 If the event didn't require students to book in advance then ignore this section.
 
@@ -99,12 +100,12 @@ In offline mode you will be asked to enter some details about the event. You nee
 
 Hit ok to start recording attendance. Depending on the event settings and the attendee's booking status, when you enter an ID EventSwipe will display the following messages:
 
-####'Success' messages
+#### 'Success' messages
 
 * __Booked__ - ID is on the booking list and entry has been recorded. EventSwipe will also display what entry slot the attendee has been booked for (if applicable)
 * __Recorded__ - ID has been recorded (displayed when a booking list is not used) 
 
-####Other messages
+#### Other messages
 
 * __Already recorded__ - ID has already been entered and recorded
 * __Not booked__ - ID is not on the booking list and is not recorded in the attendees list. EventSwipe will also open a dialogue box asking you whether or not to let the attendee into the event. Selecting 'Yes' records the student number.
@@ -113,23 +114,23 @@ Hit ok to start recording attendance. Depending on the event settings and the at
 
 You can also record an ID which was not on the booking list by switching EventSwipe to 'record all mode' with the button in the top right. You can then enter a non-booked ID and record it. This mode is useful if you want to let in a batch of non-booked attendees in one go and can be used as a fall back to guarantee you record entry to your event, even if something goes wrong with your booking list.
 
-###Saving the attendance list
+### Saving the attendance list
 
-####Offline mode
+#### Offline mode
 
 When you have finished recording entry to your event, hit 'finish', choose a file name and location and EventSwipe will save the list of recorded IDs (along with the entry slot they were booked for, if applicable) as a text file separated by line breaks.
 
-####Online mode
+#### Online mode
 
 Hit 'Finish' and you'll be taken to the finish screen where you can choose whether or not to mark and notify the absentees. 
 
 If something went wrong during your attendance recording or you let in early arrivals then EventSwipe might have saved some of the attendance records offline. In this case you will get a prompt when you try to close EventSwipe indicating that there are unsaved records. Follow the offline mode saving instructions in this scenario.
 
-##Future features
+## Future features
 
-###Goshawk
+### Goshawk
 
-*Expected release: September 2016*
+*Expected release: January 2018*
 
 Features
 
@@ -137,13 +138,12 @@ Features
 * Batch processing to make EventSwipe faster
 * Improved logging
 
-###Hen Harrier
+### Hen Harrier
 
-*Expected release: June 2016*
+*Expected release: June 2018*
 
 Features
 
 * Better UX feedback (loading bars etc.)
 * Ability to handle multiple booking file types (like .csv)
-* A simple counting mode when recording the IDs isn't important
 * Duplicate slot booking report
