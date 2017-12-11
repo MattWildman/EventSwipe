@@ -337,20 +337,29 @@ public class EventSwipeApp extends SingleFrameApplication {
 
     public void recordAttendance(Booking booking) throws MalformedURLException, IOException {
         final Event event = data.getEvents().get(booking.getEntrySlot() - 1);
+        globalEvent = event;
         final Booking bookingFin = booking;
         if (data.isOnlineMode()) {
             Date now = new Date();
             if (now.after(event.getRegStart())) {
                 Future<?> response = executor.submit(new Runnable() {
-                    public void run() {
+                   public void run() {
                         String bookingId = bookingFin.getBookingId().toString();
-                        try {
-                            api.markStatus(STATUS.ATTENDED, bookingId, event.getId());
-                        } catch (Exception ex) {
-                            Logger.getLogger(EventSwipeApp.class.getName()).log(Level.SEVERE, null, ex);
-                            logger.logException(ex);
-                            event.getUnsavedList().add(bookingFin.getStuNumber());
-                            data.setSavedFlag(false);
+                        if (attendanceQueue.size() <= 50) {
+                          attendanceQueue.add(bookingId);
+                          event.addToAttendanceQueue(bookingId);
+                        } else {
+                            for(int i = 0; i < attendanceQueue.size(); i++) {
+                              try {
+                                api.markStatus(STATUS.ATTENDED, bookingId, event.getId());
+                              } catch (Exception ex) {
+                                Logger.getLogger(EventSwipeApp.class.getName()).log(Level.SEVERE, null, ex);
+                                logger.logException(ex);
+                                event.getUnsavedList().add(bookingFin.getStuNumber());
+                                data.setSavedFlag(false);
+                              }
+                            }
+                            attendanceQueue.clear();
                         }
                     }
                 });
@@ -598,6 +607,17 @@ public class EventSwipeApp extends SingleFrameApplication {
     }
 
     public void finish(Boolean markAbsent, Boolean notify) throws MalformedURLException, IOException {
+      
+        for(String bookingId:attendanceQueue) {
+            try {
+                System.out.println("Checking the finish method!");
+                api.markStatus(STATUS.ATTENDED, bookingId, globalEvent.getId());
+            } catch(Exception ex) {
+                Logger.getLogger(EventSwipeApp.class.getName()).log(Level.SEVERE, null, ex);
+                logger.logException(ex);
+                data.setSavedFlag(false);
+            }
+        }
         if (!data.getSavedFlag()) {
             this.saveAndFinish();
         }
@@ -713,7 +733,8 @@ public class EventSwipeApp extends SingleFrameApplication {
         }
         return true;
     }
-    
+    private List<String> attendanceQueue = new ArrayList<String>();
+    private Event globalEvent;
     private ExecutorService executor;
     private EventSwipeLogger logger;
     private EventSwipeData data;
