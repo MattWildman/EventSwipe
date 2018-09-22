@@ -6,6 +6,7 @@ import eventswipe.models.*;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,6 +21,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,7 +74,7 @@ public class EventSwipeView extends FrameView {
         try {
             Image i = ImageIO.read(getClass().getResource("/eventswipe/resources/yourLogoLarge.jpeg"));
             this.getFrame().setIconImage(i);
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println(e.getMessage());
         }
         this.getFrame().setPreferredSize(new Dimension(750, 500));
@@ -81,31 +83,36 @@ public class EventSwipeView extends FrameView {
         buildCounterMap();
         updateBookingPanel(true);
         updateOnlineBookingPanel(true);
-        panelStack = new Stack<JPanel>();
+        panelStack = new Stack<>();
         panelStack.push((JPanel) this.getComponent());
     }
 
     javax.swing.Action save = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             app.saveAttendeesToFile();
         }
     };
     javax.swing.Action toggleBooking = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             checkingModeToggle1.doClick();
         }
     };
     javax.swing.Action checkBooking = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             searchButton.doClick();
         }
     };
     javax.swing.Action toggleConnection = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             onlineModeToggle.doClick();
         }
     };
     javax.swing.Action refreshAttendees = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             refreshAttendeesButton.doClick();
         }
@@ -153,7 +160,7 @@ public class EventSwipeView extends FrameView {
     public void finishAction() {
         try {
             app.finish(markAbsentOption.isSelected(), notifyAbsentOption.isSelected());
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
             app.getLogger().logException(ex);
             JOptionPane.showMessageDialog(
@@ -165,7 +172,7 @@ public class EventSwipeView extends FrameView {
         }
         try {
             app.finish(false, false);
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             Logger.getLogger(EventSwipeApp.class.getName()).log(Level.SEVERE, null, ex);
             app.getLogger().logException(ex);
             System.exit(0);
@@ -188,7 +195,7 @@ public class EventSwipeView extends FrameView {
     
     @Action
     public void saveSettings() {
-        boolean complete = true;
+        boolean complete;
         JTextField[] required = {
             hostInput, apiIdInput, apiSecretInput, regexInput
         };
@@ -223,7 +230,7 @@ public class EventSwipeView extends FrameView {
             markDefaultField(hostInput);
         }
         if (complete) {
-            Map<String,String> props = new HashMap<String,String>();
+            Map<String,String> props = new HashMap<>();
             props.put(EventSwipeData.STATUS_KEY, "custom");
             props.put(EventSwipeData.API_ID_KEY, apiIdInput.getText());
             props.put(EventSwipeData.API_SECRET_KEY, apiSecretInput.getText());
@@ -264,8 +271,8 @@ public class EventSwipeView extends FrameView {
             hostInput, apiIdInput, apiSecretInput, regexInput,
             defaultUsernameInput, defaultPasswordInput
         };
-        for (int i = 0; i < fields.length; i++) {
-            this.markDefaultField(fields[i]);
+        for (JTextField field : fields) {
+            this.markDefaultField(field);
         }
         app.clearProperties();
         hostInput.requestFocusInWindow();
@@ -3006,7 +3013,7 @@ private void noWaitingListRadioButtonActionPerformed(java.awt.event.ActionEvent 
 
 private void browseFileAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseFileAction
     JFileChooser fc = new JFileChooser();
-    File file = null;
+    File file;
     fc.addChoosableFileFilter(new TextCSVFilter());
     int returnVal = fc.showDialog(app.getMainFrame(), "Choose");
     if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -3039,7 +3046,7 @@ private void loadEventButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
     Slot slotView = this.getSlotView(source, Component.LOAD);
     JFormattedTextField idInput = (JFormattedTextField) slotView.allComponents.get(Component.ID);
     JTextField titleInput = (JTextField) slotView.allComponents.get(Component.TITLE);
-    String id = "";
+    String id;
     id = idInput.getText();
     if (id.isEmpty() || id.equals(idInputDefault)) {
         JOptionPane.showMessageDialog(app.getMainFrame(),
@@ -3068,15 +3075,15 @@ private void loadEventButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
 }//GEN-LAST:event_loadEventButtonActionPerformed
 
 private void searchEventsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchEventsButtonActionPerformed
-    List<Event> events = new ArrayList<Event>();
+    List<Event> events = new ArrayList<>();
     try {
         events = app.getEvents("");
-    } catch (Exception ex) {
+    } catch (IOException ex) {
         Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
         app.getLogger().logException(ex);
         showGenericErrorMessage();
     }
-    List<String> eventTitles = new ArrayList<String>();
+    List<String> eventTitles = new ArrayList<>();
     for (Event event : events){
         eventTitles.add(event.getTitle());
     }
@@ -3102,7 +3109,7 @@ private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
     String input = searchInput.getText();
     if (!input.isEmpty()) {
         if (app.isValidId(input)) {
-            Booking booking = new Booking("");
+            Booking booking;
                 try {
                     booking = app.processSearchInput(input);
                     updateBookingStatus(booking);
@@ -3112,7 +3119,7 @@ private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                 } catch (EarlyRegistrationException er) {
                     app.getLogger().logException(er);
                     earlyRegistrationDisplay(input);
-                } catch (Exception ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                     app.getLogger().logException(ex);
                     showGenericErrorMessage();
@@ -3126,11 +3133,11 @@ private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
             searchInput.setText("");
             searchInput.requestFocusInWindow();
             if (app.isOnlineMode()) {
-                List<Student> students = new ArrayList<Student>();
+                List<Student> students = new ArrayList<>();
                 try {
                     input = URLEncoder.encode(input, app.getCharset());
                     students = app.getStudents(input);
-                } catch (Exception ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                     app.getLogger().logException(ex);
                     searchInput.setEnabled(true);
@@ -3143,7 +3150,7 @@ private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                                                   JOptionPane.ERROR_MESSAGE);
                 }
                 else {
-                    List<String> studentNames = new ArrayList<String>();
+                    List<String> studentNames = new ArrayList<>();
                     for (Student student : students){
                         studentNames.add(student.getFirstName() + " " +
                                          student.getLastName());
@@ -3227,7 +3234,7 @@ private void refreshAttendeesButtonActionPerformed(java.awt.event.ActionEvent ev
     try {
         totalAttendeeCountDisplay.setText(app.getAttendeeCount());
         updateEventStatus();
-    } catch (Exception ex) {
+    } catch (IOException ex) {
         Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
         app.getLogger().logException(ex);
         totalAttendeeCountDisplay.setText(currentCount);
@@ -3289,7 +3296,7 @@ private void studentIdLengthSpinnerStateChanged(javax.swing.event.ChangeEvent ev
 }//GEN-LAST:event_studentIdLengthSpinnerStateChanged
 
 private void regexRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regexRadioActionPerformed
-    String regex = "";
+    String regex;
     JRadioButton source = (JRadioButton) evt.getSource();
     if (source.equals(numbersRadio)) {
         regex = "\\d";
@@ -3351,7 +3358,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
             else if(reply == JOptionPane.NO_OPTION) {
                 switchToPanel(offlinePanel);
             }
-        } catch (Exception e) {
+        } catch (HeadlessException | IOException e) {
             JOptionPane.showMessageDialog(app.getMainFrame(),
               "There was a problem logging in. " +
               "Please check your internet connection and booking system settings and try again",
@@ -3449,7 +3456,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                     }
                     else if(!slot.isUnlimited()) {
                         int spaces = bookingLimit - bookingCount;
-                        String message = "";
+                        String message;
                         Object[] options = {"Go to event", "Continue"};
                         if (spaces == 0) {
                             message = slot.getTitle() + " is fully booked. " +
@@ -3500,7 +3507,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
             String totalAttendees = "0";
             try {
                 totalAttendees = app.getAttendeeCount();
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                 app.getLogger().logException(ex);
             }
@@ -3543,7 +3550,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
             message += " has already been recorded";
             bookingStatus = "Already recorded";
         }
-        else if (booking.getStatus() == Booking.EARLY_STATUS) {
+        else if (Objects.equals(booking.getStatus(), Booking.EARLY_STATUS)) {
             Utils.failureNoise();
             bookingStatus = "Too early";
             int reply = JOptionPane.showConfirmDialog(app.getMainFrame(),
@@ -3575,7 +3582,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                 } catch (EventFullException ef) {
                     eventFullDisplay(ef.getStuNum());
                     return;
-                } catch (Exception ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                     app.getLogger().logException(ex);
                     showGenericErrorMessage();
@@ -3624,7 +3631,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                 } catch (EventFullException ef) {
                     eventFullDisplay(ef.getStuNum());
                     return;
-                } catch (Exception ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                     app.getLogger().logException(ex);
                     showGenericErrorMessage();
@@ -3653,27 +3660,31 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
         entrySlotDisplayTextField1.setText(slot);
         Color color;
         boolean enabled;
-        if(statusMessage.equals("Booked")) {
-            color = Color.GREEN;
-            enabled = true;
-            localAttendeeCountTextField.setText(app.incrementLocalAttendeeCount());
-            attendeesDisplay++;
-        }
-        else if(statusMessage.equals("Recorded") || statusMessage.equals("")) {
-            color = Color.WHITE;
-            enabled = false;
-            localAttendeeCountTextField.setText(app.incrementLocalAttendeeCount());
-            attendeesDisplay++;
-        }
-        else {
-            enabled = false;
-            color = statusMessage.equals("Not booked") ? Color.RED : Color.ORANGE;
+        switch (statusMessage) {
+            case "Booked":
+                color = Color.GREEN;
+                enabled = true;
+                localAttendeeCountTextField.setText(app.incrementLocalAttendeeCount());
+                attendeesDisplay++;
+                break;
+            case "Recorded":
+            case "":
+                color = Color.WHITE;
+                enabled = false;
+                localAttendeeCountTextField.setText(app.incrementLocalAttendeeCount());
+                attendeesDisplay++;
+                break;
+            default:
+                enabled = false;
+                color = statusMessage.equals("Not booked") ? Color.RED : Color.ORANGE;
+                break;
         }
         statusDisplayTextField1.setBackground(color);
         entrySlotLabel1.setEnabled(enabled && !app.isSingleSlot());
         entrySlotDisplayTextField1.setEnabled(enabled && !app.isSingleSlot());
         int delay = 500; //milliseconds
         ActionListener taskPerformer = new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent evt) {
                 statusDisplayTextField1.setBackground(null);
             }
@@ -3684,7 +3695,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
         if (app.isOnlineMode()){
             try {
                 totalAttendeeCountDisplay.setText(app.getAttendeeCount());
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                 app.getLogger().logException(ex);
                 totalAttendeeCountDisplay.setText(app.getLocalAttendeeCount());
@@ -3933,7 +3944,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                 showBrowserError();
             }
             else {
-                URI uri = null;
+                URI uri;
                 try {
                     uri = new URI(url);
                     desktop.browse(uri);
@@ -4224,8 +4235,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
 
     private boolean markEmptyFields(JTextField[] required) {
         boolean complete = true;
-        for (int i = 0; i < required.length; i++) {
-            JTextField r = required[i];
+        for (JTextField r : required) {
             if (r.getText().isEmpty() || r.getText().matches("^\\s+$")) {
                 markErrorField(r);
                 complete = false;

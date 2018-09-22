@@ -18,12 +18,12 @@ import static org.junit.Assert.*;
  *
  * @author wildmanm
  */
-public class ProperitesTest {
+public class PropertiesTest {
 
     public EventSwipeApp app;
     public Map<String,String> pMap;
 
-    public ProperitesTest() {
+    public PropertiesTest() {
         app = new EventSwipeApp();
         pMap = new HashMap<String,String>();
     }
@@ -66,7 +66,7 @@ public class ProperitesTest {
             p.list(System.out);
             assert(p.size() > 0);
         } catch (IOException ex) {
-            Logger.getLogger(ProperitesTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PropertiesTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
     }
@@ -77,7 +77,7 @@ public class ProperitesTest {
             Properties p = app.getProperties(EventSwipeData.API_PROPERITES_PATH);
             assertEquals("Incorrect app id", "lse.careers", p.getProperty(EventSwipeData.API_ID_KEY));
         } catch (IOException ex) {
-            Logger.getLogger(ProperitesTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PropertiesTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
     }

@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,7 +36,7 @@ public class Utils {
             if (address == null) {
                 return false;
             }
-        } catch (Exception e) {
+        } catch (UnknownHostException e) {
             System.err.println("Error: " + e.getMessage());
             return false;
         }
@@ -89,24 +90,24 @@ public class Utils {
     }
 
     public static List<String> readAllLines(File file, String encoding) {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         boolean firstLine = true;
         try {
             FileInputStream fstream = new FileInputStream(file);
-            DataInputStream dis = new DataInputStream(fstream);
-            InputStreamReader isr = new InputStreamReader(dis, encoding);
-            BufferedReader br = new BufferedReader(isr);
-            String strLine = null;
-            while ((strLine = br.readLine()) != null) {
-                strLine = firstLine && encoding.equals("UTF8")
-                        ? Utils.removeUTF8BOM(strLine) : strLine;
-                list.add(strLine);
-                if (firstLine) {
-                    firstLine = false;
+            try (DataInputStream dis = new DataInputStream(fstream)) {
+                InputStreamReader isr = new InputStreamReader(dis, encoding);
+                BufferedReader br = new BufferedReader(isr);
+                String strLine;
+                while ((strLine = br.readLine()) != null) {
+                    strLine = firstLine && encoding.equals("UTF8")
+                            ? Utils.removeUTF8BOM(strLine) : strLine;
+                    list.add(strLine);
+                    if (firstLine) {
+                        firstLine = false;
+                    }
                 }
             }
-            dis.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
         }
         return list;
@@ -114,13 +115,14 @@ public class Utils {
 
     public static String getEncoding(File file) {
         String testString = Utils.readLine(file, ANSI).substring(0, 2);
-        if (testString.equals(UTF8_TEST_STRING)) {
-            return UTF8;
-        } else if (testString.equals(UNICODE_LE_TEST_STRING)
-                || testString.equals(UNICODE_BE_TEST_STRING)) {
-            return UNICODE;
-        } else {
-            return ANSI;
+        switch (testString) {
+            case UTF8_TEST_STRING:
+                return UTF8;
+            case UNICODE_LE_TEST_STRING:
+            case UNICODE_BE_TEST_STRING:
+                return UNICODE;
+            default:
+                return ANSI;
         }
     }
 
