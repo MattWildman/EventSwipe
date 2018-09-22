@@ -22,6 +22,7 @@ import java.util.EventObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,9 +67,11 @@ public class EventSwipeApp extends SingleFrameApplication {
     @Override
     protected void configureWindow(final java.awt.Window root) {
         this.addExitListener(new org.jdesktop.application.Application.ExitListener() {
+            @Override
             public boolean canExit(EventObject arg0) {
                 return data.getSavedFlag();
             }
+            @Override
             public void willExit(EventObject arg0) {
                 root.dispose();
             }
@@ -119,6 +122,7 @@ public class EventSwipeApp extends SingleFrameApplication {
     /**
      * Returns the Properties object for the specific booking system installation.
      *
+     * @param   path to the properties file
      * @return  Booking system Properties object
      * @throws  IOException
      * @see     Properties
@@ -152,7 +156,7 @@ public class EventSwipeApp extends SingleFrameApplication {
             data.setPropertiesFlag(false);
             Logger.getLogger(EventSwipeApp.class.getName())
                 .log(Level.SEVERE, "Error setting properties", ex);
-            throw new NoPropertiesException("Error setting properties");
+            throw new NoPropertiesException();
         }
     }
 
@@ -289,6 +293,7 @@ public class EventSwipeApp extends SingleFrameApplication {
             final String stuNumberFin = stuNumber;
             final Booking bookingFin = booking;
             Future<?> response = executor.submit(new Runnable() {
+                @Override
                 public void run() {
                     Event freeEvent = data.getEvents().get(0);
                     try {
@@ -306,10 +311,8 @@ public class EventSwipeApp extends SingleFrameApplication {
                         if (freeSlot > 0) {
                             freeEvent = data.getEvents().get(freeSlot - 1);
                             String eventId = freeEvent.getId();
-                            String studId = "";
-                            studId = api.getStudent(stuNumberFin).getId().toString();
-                            Integer newId = 0;
-                            newId = api.bookStudent(studId, eventId).getBookingId();
+                            String studId = api.getStudent(stuNumberFin).getId().toString();
+                            Integer newId = api.bookStudent(studId, eventId).getBookingId();
                             bookingFin.setEntrySlot(freeSlot);
                             bookingFin.setBookingId(newId);
                             recordAttendance(bookingFin);
@@ -318,7 +321,7 @@ public class EventSwipeApp extends SingleFrameApplication {
                             freeEvent.getUnsavedList().add(stuNumberFin);
                             data.setSavedFlag(false);
                         }
-                    } catch (Exception ex) {
+                    } catch (IOException ex) {
                         Logger.getLogger(EventSwipeApp.class.getName())
                               .log(Level.SEVERE, "Student not booked", ex);
                         logger.logException(ex);
@@ -337,29 +340,21 @@ public class EventSwipeApp extends SingleFrameApplication {
 
     public void recordAttendance(Booking booking) throws MalformedURLException, IOException {
         final Event event = data.getEvents().get(booking.getEntrySlot() - 1);
-        globalEvent = event;
         final Booking bookingFin = booking;
         if (data.isOnlineMode()) {
             Date now = new Date();
             if (now.after(event.getRegStart())) {
                 Future<?> response = executor.submit(new Runnable() {
-                   public void run() {
+                    @Override
+                    public void run() {
                         String bookingId = bookingFin.getBookingId().toString();
-                        if (attendanceQueue.size() <= 50) {
-                          attendanceQueue.add(bookingId);
-                          event.addToAttendanceQueue(bookingId);
-                        } else {
-                            for(int i = 0; i < attendanceQueue.size(); i++) {
-                              try {
-                                api.markStatus(STATUS.ATTENDED, bookingId, event.getId());
-                              } catch (Exception ex) {
-                                Logger.getLogger(EventSwipeApp.class.getName()).log(Level.SEVERE, null, ex);
-                                logger.logException(ex);
-                                event.getUnsavedList().add(bookingFin.getStuNumber());
-                                data.setSavedFlag(false);
-                              }
-                            }
-                            attendanceQueue.clear();
+                        try {
+                            api.markStatus(STATUS.ATTENDED, bookingId, event.getId());
+                        } catch (IOException ex) {
+                            Logger.getLogger(EventSwipeApp.class.getName()).log(Level.SEVERE, null, ex);
+                            logger.logException(ex);
+                            event.getUnsavedList().add(bookingFin.getStuNumber());
+                            data.setSavedFlag(false);
                         }
                     }
                 });
@@ -397,10 +392,10 @@ public class EventSwipeApp extends SingleFrameApplication {
 
     public void writeToFile(File file, String content) {
         try {
-            FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-            fw.write(content);
-            fw.close();
-        } catch (Exception e) {
+            try (FileWriter fw = new FileWriter(file.getAbsoluteFile(), true)) {
+                fw.write(content);
+            }
+        } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
         }
     }
@@ -421,7 +416,7 @@ public class EventSwipeApp extends SingleFrameApplication {
             File saveFile = new File(path);
             try {
                 saveFile.createNewFile();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.err.println("Error: " + e.getMessage());
             }
             writeToFile(saveFile, header);
@@ -435,7 +430,7 @@ public class EventSwipeApp extends SingleFrameApplication {
             Desktop dk = Desktop.getDesktop();
             try {
                 dk.open(saveFile);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.err.println("Error: " + e.getMessage());
             }
         }
@@ -462,7 +457,7 @@ public class EventSwipeApp extends SingleFrameApplication {
         }
         else {
             Arrays.fill(password, '0');
-            throw new NoPropertiesException("No properties file set");
+            throw new NoPropertiesException();
         }
         return success;
     }
@@ -482,7 +477,7 @@ public class EventSwipeApp extends SingleFrameApplication {
     public void createWaitingList(String path) {
         File file = new File(path);
         List<String> numberList = Utils.readAllLines(file, Utils.getEncoding(file));
-        List<Student> waitingList = new ArrayList<Student>();
+        List<Student> waitingList = new ArrayList<>();
         for (String number : numberList) {
             Student student = new Student();
             student.setStuNumber(number);
@@ -509,7 +504,7 @@ public class EventSwipeApp extends SingleFrameApplication {
         for (int i = 0; i < paths.size(); i++) {
             File file = new File(paths.get(i));
             List<String> numberList = Utils.readAllLines(file, Utils.getEncoding(file));
-            List<Booking> bookingList = new ArrayList<Booking>();
+            List<Booking> bookingList = new ArrayList<>();
             for (String number : numberList) {
                 Booking booking = new Booking(number);
                 bookingList.add(booking);
@@ -607,17 +602,6 @@ public class EventSwipeApp extends SingleFrameApplication {
     }
 
     public void finish(Boolean markAbsent, Boolean notify) throws MalformedURLException, IOException {
-      
-        for(String bookingId:attendanceQueue) {
-            try {
-                System.out.println("Checking the finish method!");
-                api.markStatus(STATUS.ATTENDED, bookingId, globalEvent.getId());
-            } catch(Exception ex) {
-                Logger.getLogger(EventSwipeApp.class.getName()).log(Level.SEVERE, null, ex);
-                logger.logException(ex);
-                data.setSavedFlag(false);
-            }
-        }
         if (!data.getSavedFlag()) {
             this.saveAndFinish();
         }
@@ -646,14 +630,14 @@ public class EventSwipeApp extends SingleFrameApplication {
             File saveFile = new File(path);
             try {
                 saveFile.createNewFile();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.err.println("Error: " + e.getMessage());
             }
             writeToFile(saveFile, body);
             Desktop dk = Desktop.getDesktop();
             try {
                 dk.open(saveFile);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.err.println("Error: " + e.getMessage());
             }
         }
@@ -668,9 +652,6 @@ public class EventSwipeApp extends SingleFrameApplication {
         data.setCount(0);
     }
 
-    /**
-     * Main method launching the application.
-     */
     public static void main(String[] args) {
         launch(EventSwipeApp.class, args);
     }
@@ -678,14 +659,14 @@ public class EventSwipeApp extends SingleFrameApplication {
     private void bookUnsavedRecords() {
         data.setSavedFlag(true);
         for (Event event : data.getEvents()) {
-            List<String> saveErrors = new ArrayList<String>();
+            List<String> saveErrors = new ArrayList<>();
             for (int i = 0; i < event.getUnsavedList().size(); i++) {
                 String stuNum = event.getUnsavedList().get(i);
                 try {
                     Booking booking = getBooking(stuNum);
                     booking.setEntrySlot(event.getSlot());
                     recordAttendance(booking);
-                    if (booking.getStatus() == Booking.EARLY_STATUS) {
+                    if (Objects.equals(booking.getStatus(), Booking.EARLY_STATUS)) {
                         saveErrors.add(stuNum);
                     }
                 } catch (EventFullException ef) {
@@ -694,7 +675,7 @@ public class EventSwipeApp extends SingleFrameApplication {
                         saveErrors.add(event.getUnsavedList().get(j));
                     }
                     event.setUnsavedList(saveErrors);
-                } catch (Exception ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(EventSwipeApp.class.getName()).log(Level.SEVERE, null, ex);
                     logger.logException(ex);
                     saveErrors.add(stuNum);
@@ -724,7 +705,7 @@ public class EventSwipeApp extends SingleFrameApplication {
                 if (p.getProperty(EventSwipeData.STATUS_KEY, "default").equals("default")) {
                     return false;
                 }
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(EventSwipeApp.class.getName())
                    .log(Level.SEVERE, "Error accessing properties file", ex);
                 logger.logException(ex);
@@ -733,13 +714,10 @@ public class EventSwipeApp extends SingleFrameApplication {
         }
         return true;
     }
-    private List<String> attendanceQueue = new ArrayList<String>();
-    private Event globalEvent;
-    private ExecutorService executor;
-    private EventSwipeLogger logger;
-    private EventSwipeData data;
-    private BookingSystemAPI api;
-
-    private int loadEventsLock = 0;
+    
+    private final ExecutorService executor;
+    private final EventSwipeLogger logger;
+    private final EventSwipeData data;
+    private final BookingSystemAPI api;
 
 }

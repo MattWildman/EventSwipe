@@ -34,7 +34,7 @@ public class EventSwipeData {
 
     public static final Map<String,String> DEFAULT_PROPS;
     static {
-        DEFAULT_PROPS = new HashMap<String,String>();
+        DEFAULT_PROPS = new HashMap<>();
         DEFAULT_PROPS.put(STATUS_KEY, "default");
         DEFAULT_PROPS.put(STUDENT_ID_PATTERN_KEY, "^.+$");
         DEFAULT_PROPS.put(API_SECRET_KEY, "");
@@ -46,6 +46,7 @@ public class EventSwipeData {
 
    /**
      * Singleton constructor for EventSwipeData
+     * @return the instance of EventSwipeData
     */
     public static EventSwipeData getInstance() {
         if (instance == null) {
@@ -55,7 +56,7 @@ public class EventSwipeData {
     }
 
     private EventSwipeData() {
-        allFileBookedList = new ArrayList<String>();
+        allFileBookedList = new ArrayList<>();
     }
 
     /**
@@ -453,7 +454,7 @@ public class EventSwipeData {
         count = c;
     }
 
-    private List<Event> events = new ArrayList<Event>();
+    private List<Event> events = new ArrayList<>();
 
     private List<String> allFileBookedList;
 

@@ -235,6 +235,7 @@ public abstract class BookingSystemAPI {
    /**
      *
      * Called when a valid properties file exists. Initialises all booking system variables from property values.
+     * @throws java.io.IOException
      */
     public abstract void init() throws IOException;
 
