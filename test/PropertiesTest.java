@@ -25,7 +25,7 @@ public class PropertiesTest {
 
     public PropertiesTest() {
         app = new EventSwipeApp();
-        pMap = new HashMap<String,String>();
+        pMap = new HashMap<>();
     }
 
     @BeforeClass

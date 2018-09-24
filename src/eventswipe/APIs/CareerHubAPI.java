@@ -11,7 +11,6 @@ import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +19,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -41,15 +42,7 @@ public class CareerHubAPI extends BookingSystemAPI {
     @Override
     public void init() {
         Map<String, String> p = EventSwipeData.getInstance().getCustomProperties();
-       
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar calendar = Calendar.getInstance();
-        Date todayDate = calendar.getTime();
-        String today = dateFormat.format(todayDate);
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
-        Date tomorrowDate = calendar.getTime();
-        String tomorrow = dateFormat.format(tomorrowDate);
-    
+
         HOST = p.get(EventSwipeData.HOST_KEY);
         API_ID = p.get(EventSwipeData.API_ID_KEY);
         SECRET = p.get(EventSwipeData.API_SECRET_KEY);
@@ -68,13 +61,14 @@ public class CareerHubAPI extends BookingSystemAPI {
         EVENT_ADMIN_URL_BASE = ADMIN_URL + "event.aspx?id=";
         EVENT_API_SEARCH_URL = HOST + "api/public/v1/events/";
         EVENT_API_URL =        HOST + "api/integrations/v1/events/";
-        EVENT_API_LIST_URL =   EVENT_API_URL + "?dateOptions.From=" + today + "&dateOptions.To=" + tomorrow + "&dateOptions.Date=Start&sortOptions.Order=Start&sortOptions.Descending=true&take=20";
+        EVENT_API_LIST_URL =   EVENT_API_URL + "?filterOptions.filterIds=82&filterOptions.filterIds=83&filterOptions.filterOperator=And";
     }
-
-  
 
     @Override
     public boolean logIn(String username, char[] password) throws MalformedURLException, IOException {
+        if (isAlreadyLoggedIn()) {
+            return true;
+        }
         String dateStr = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(new Date());
         Map<String,String> requestHeaders = new HashMap<>();
         requestHeaders.put("Content-Type", "application/x-www-form-urlencoded;charset=" + getCharset());
@@ -84,15 +78,7 @@ public class CareerHubAPI extends BookingSystemAPI {
                           "&password=" + String.valueOf(password) +
                           "&isPersistent=true&isPersistent=false";
         HttpUtils.sendDataToURL(LOGIN_URL, "POST", loginData, getCharset(), requestHeaders);
-        CookieManager manager = (CookieManager)CookieHandler.getDefault();
-        CookieStore cookieJar =  manager.getCookieStore();
-        List <HttpCookie> cookies = cookieJar.getCookies();
-        for(HttpCookie cookie : cookies) {
-            if(cookie.getName().equals(AUTH_COOKIE_NAME)) {
-                return true;
-            }
-        }
-        return false;
+        return isAlreadyLoggedIn();
     }
 
     @Override
@@ -123,7 +109,7 @@ public class CareerHubAPI extends BookingSystemAPI {
     public List<Booking> getBookingList(String eventKey) throws MalformedURLException, IOException {
         List<Booking> bookings = new ArrayList<>();
         String response = HttpUtils.getDataFromURL(QUERY_URL + eventKey);
-
+        LOG.log(Level.FINER, "Booking list JSON for event {0}: {1}", new Object[]{eventKey, response});
         JSONObject bookingData = new JSONObject(response);
         JSONArray jsonBookings = bookingData.getJSONArray("bookings");
         for (int i=0; i < jsonBookings.length(); i++) {
@@ -131,27 +117,22 @@ public class CareerHubAPI extends BookingSystemAPI {
             Booking booking;
             try {
                 booking = new Booking(jsonBooking.getString("externalId"));
-
                 if (!jsonBooking.isNull("firstName")) {
                     booking.setFirstName(jsonBooking.getString("firstName"));
                 } else {
                     booking.setFirstName("");
                 }
-
-               if (!jsonBooking.isNull("lastName")) {
+                if (!jsonBooking.isNull("lastName")) {
                     booking.setLastName(jsonBooking.getString("lastName"));
-                 } else {
+                } else {
                     booking.setLastName("");
                 }
                 booking.setId(jsonBooking.getInt("jobSeekerId"));
-
                 booking.setBookingId(jsonBooking.getInt("id"));
                 booking.setStatus(jsonBooking.getInt("status"));
                 bookings.add(booking);
             } catch (org.json.JSONException je) {
-                System.err.println("Empty student number error. Id: " +
-                                   jsonBooking.getInt("jobSeekerId"));
-  
+                LOG.log(Level.SEVERE, "Empty student number for id: {}", jsonBooking.getInt("jobSeekerId"));
             }
         }
         return bookings;
@@ -278,19 +259,19 @@ public class CareerHubAPI extends BookingSystemAPI {
         String requestUrl = BOOKING_URL + eventKey;
         String bookingDetails = HttpUtils.sendDataToURL(requestUrl, "POST", postData, getCharset(), requestHeaders);
         JSONObject jsonBooking = (JSONObject) new JSONObject(bookingDetails).get("booking");
+        LOG.log(Level.FINER, jsonBooking.toString());
         Booking booking = new Booking(jsonBooking.getString("externalId"));
 
         if (!jsonBooking.isNull("firstName")) {
-                    booking.setFirstName(jsonBooking.getString("firstName"));
-                } else {
-                    booking.setFirstName("");
-                }
-
-               if (!jsonBooking.isNull("lastName")) {
-                    booking.setLastName(jsonBooking.getString("lastName"));
-                 } else {
-                    booking.setLastName("");
-                }
+            booking.setFirstName(jsonBooking.getString("firstName"));
+        } else {
+            booking.setFirstName("");
+        }
+        if (!jsonBooking.isNull("lastName")) {
+            booking.setLastName(jsonBooking.getString("lastName"));
+        } else {
+            booking.setLastName("");
+        }
 
         booking.setId(jsonBooking.getInt("jobSeekerId"));
         booking.setBookingId(jsonBooking.getInt("id"));
@@ -303,6 +284,7 @@ public class CareerHubAPI extends BookingSystemAPI {
         String query = "?s=" + stuNumber +
                        "&type=JobSeeker&maxResults=1&current=Current&active=true";
         String stuData = HttpUtils.getDataFromURL(STUDENT_SEARCH_BASE + query);
+        LOG.log(Level.FINER, stuData);
         JSONObject jsonStudent = null;
         try {
             jsonStudent = new JSONArray(stuData).getJSONObject(0);
@@ -371,7 +353,8 @@ public class CareerHubAPI extends BookingSystemAPI {
         String venue;
         Map<String,String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + this.getAPIToken("Integrations.Events"));
-        String response = HttpUtils.getDataFromURL(EVENT_API_LIST_URL, requestHeaders);
+        String response = HttpUtils.getDataFromURL(EVENT_API_LIST_URL, requestHeaders); 
+        LOG.log(Level.FINER, response);
         JSONArray jsonEvents = new JSONArray(response);
         for (int i=0; i < jsonEvents.length(); i++) {
             JSONObject jsonEvent = jsonEvents.getJSONObject(i);
@@ -471,6 +454,18 @@ public class CareerHubAPI extends BookingSystemAPI {
     public boolean isValidStuNum(String stuNum) {
         return stuNum.matches(STU_NUM_PATTERN);
     }
+    
+    private boolean isAlreadyLoggedIn() {
+        CookieManager manager = (CookieManager)CookieHandler.getDefault();
+        CookieStore cookieJar =  manager.getCookieStore();
+        List <HttpCookie> cookies = cookieJar.getCookies();
+        for(HttpCookie cookie : cookies) {
+            if(cookie.getName().equals(AUTH_COOKIE_NAME)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public boolean isValidId(String id) {
         return Utils.isNumeric(id);
@@ -509,6 +504,8 @@ public class CareerHubAPI extends BookingSystemAPI {
 
     private final String charset = "UTF-8";
     private final String AUTH_COOKIE_NAME = ".CHAUTH";
+    
+    private static final Logger LOG = Logger.getLogger(CareerHubAPI.class.getName());
 
     private final Map<String,AccessToken> tokens = new HashMap<>();
     private static BookingSystemAPI instance = null;

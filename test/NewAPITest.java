@@ -27,9 +27,9 @@ public class NewAPITest {
     private static BookingSystemAPI api;
     private static EventSwipeApp app;
     private static EventSwipeData data;
-    private static String username = "eventswipe";
-    private static char[] password = {'m','i','k','e','t','i','l','e','y'};
-
+    private static final String USERNAME = "eventswipe";
+    private static final char[] PASSWORD = {'m','i','k','e','t','i','l','e','y'};
+    
     public NewAPITest() {}
 
     @BeforeClass
@@ -61,8 +61,8 @@ public class NewAPITest {
     @Test
     public void apiLoginTest() throws Exception {
         try {
-            assert(api.logIn(username, password));
-        } catch (Exception ex) {
+            assert(api.logIn(USERNAME, PASSWORD));
+        } catch (IOException ex) {
             Logger.getLogger(CareerHubAPITest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -83,7 +83,7 @@ public class NewAPITest {
 
     @Test
     public void getEventsListTest() {
-        List<Event> events = new ArrayList<Event>();
+        List<Event> events = new ArrayList<>();
         try {
             events = api.getEventsList();
         } catch (MalformedURLException ex) {
@@ -124,7 +124,13 @@ public class NewAPITest {
 
     @Test
     public void earlyEntryTest() {
-        Event event = new Event();
+        try {
+            api.logIn(USERNAME, PASSWORD);
+       } catch (IOException ex) {
+            Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        }
+        Event event;
         Booking booking = new Booking("349154");
             try {
                 event = api.getEvent("203802");
@@ -153,7 +159,7 @@ public class NewAPITest {
                     fail("Student shouldn't be marked early.");
                     booking.setStatus(Booking.EARLY_STATUS);
                 }
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
                 fail("Error setting up the event");
             }
