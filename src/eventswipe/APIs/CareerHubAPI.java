@@ -55,13 +55,13 @@ public class CareerHubAPI extends BookingSystemAPI {
         MARK_ATTENDED_URL =    ADMIN_URL + "events/bookings/markattended/";
         MARK_UNSPECIFIED_URL = ADMIN_URL + "events/bookings/markunspecified/";
         MARK_ABSENT_URL =      ADMIN_URL + "events/bookings/markabsent/";
-        CANCEL_URL =           ADMIN_URL + "events/bookings/cancel/";
         WAITING_LIST_BASE =    ADMIN_URL + "eventwaitinglist.aspx?id=";
         STUDENT_SEARCH_BASE =  ADMIN_URL + "suggest/JobSeeker";
         EVENT_ADMIN_URL_BASE = ADMIN_URL + "event.aspx?id=";
-        EVENT_API_SEARCH_URL = HOST + "api/public/v1/events/";
-        EVENT_API_URL =        HOST + "api/integrations/v1/events/";
-        EVENT_API_LIST_URL =   EVENT_API_URL + "?filterOptions.filterIds=82&filterOptions.filterIds=83&filterOptions.filterOperator=And";
+        
+        EVENT_API_URL =      HOST + "api/integrations/v1/events/";
+        EVENT_BOOKING_URL_TEMPL = EVENT_API_URL + "bookings/%s/%s";
+        EVENT_API_LIST_URL = EVENT_API_URL + "?filterOptions.filterIds=82&filterOptions.filterIds=83&filterOptions.filterOperator=And";
     }
 
     @Override
@@ -182,17 +182,17 @@ public class CareerHubAPI extends BookingSystemAPI {
     }
 
     @Override
-    public void markStatus(STATUS status, String studentKey, String eventKey) throws MalformedURLException, IOException {
-        List<String> key = Arrays.asList(studentKey);
+    public void markStatus(STATUS status, String bookingId, String eventKey) throws MalformedURLException, IOException {
+        List<String> key = Arrays.asList(bookingId);
         markStatus(status, key, eventKey);
     }
 
     @Override
-    public void markStatus(STATUS status, List<String> studentKeys, String eventKey) throws MalformedURLException, IOException {
+    public void markStatus(STATUS status, List<String> bookingIds, String eventKey) throws MalformedURLException, IOException {
         Map<String,String> requestHeaders = new HashMap<>();
         requestHeaders.put("Content-Type", "application/json;charset=" + this.getCharset());
         String postData = "{\"eventID\":" + eventKey + "," +
-                          "\"ids\":" + studentKeys;
+                          "\"ids\":" + bookingIds;
         String url;
         switch (status) {
             case ATTENDED:
@@ -220,12 +220,12 @@ public class CareerHubAPI extends BookingSystemAPI {
     }
 
     @Override
-    public void markAbsent(List<String> studentKeys, String eventKey, Boolean notify) throws MalformedURLException, IOException {
+    public void markAbsent(List<String> bookingIds, String eventKey, Boolean notify) throws MalformedURLException, IOException {
         Map<String,String> requestHeaders = new HashMap<>();
 
         requestHeaders.put("Content-Type", "application/json;charset=" + this.getCharset());
         String postData = "{\"eventID\":" + eventKey + "," +
-                          "\"ids\":" + studentKeys + "," +
+                          "\"ids\":" + bookingIds + "," +
                           "\"notify\":" + notify + "}";
         String url = MARK_ABSENT_URL + eventKey;
         HttpUtils.sendDataToURL(url, "POST", postData, this.getCharset(), requestHeaders);
@@ -239,22 +239,17 @@ public class CareerHubAPI extends BookingSystemAPI {
     }
 
     @Override
-    public void cancelBooking(String studentKey, String eventKey) throws MalformedURLException, IOException {
-        Map<String,String> requestHeaders = new HashMap<>();
-        requestHeaders.put("Content-Type", "application/json;charset=" + getCharset());
-        String postData = "{\"eventID\":" + eventKey + "," +
-                           "\"ids\":[" + studentKey + "]," +
-                           "\"notify\":false}";
-        String requestUrl = CANCEL_URL + eventKey;
-        HttpUtils.sendDataToURL(requestUrl, "POST", postData, getCharset(), requestHeaders);
+    public void cancelBooking(String externalId, String eventKey) throws MalformedURLException, IOException {
+        String requestUrl = String.format(EVENT_BOOKING_URL_TEMPL, externalId, eventKey);
+        HttpUtils.sendDeleteRequestToUrl(requestUrl, getAPIAuthHeaders());
     }
 
     @Override
-    public Booking bookStudent(String studentID, String eventKey) throws MalformedURLException, IOException {
+    public Booking bookStudent(String jobSeekerId, String eventKey) throws MalformedURLException, IOException {
         Map<String,String> requestHeaders = new HashMap<>();
         requestHeaders.put("Content-Type", "application/json;charset=" + getCharset());
         String postData = "{\"eventID\":" + eventKey + "," +
-                          "\"jobSeekerID\":" + studentID + "," +
+                          "\"jobSeekerID\":" + jobSeekerId + "," +
                           "\"notify\":false}";
         String requestUrl = BOOKING_URL + eventKey;
         String bookingDetails = HttpUtils.sendDataToURL(requestUrl, "POST", postData, getCharset(), requestHeaders);
@@ -280,22 +275,22 @@ public class CareerHubAPI extends BookingSystemAPI {
     }
 
     @Override
-    public Student getStudent(String stuNumber) throws MalformedURLException, IOException {
-        String query = "?s=" + stuNumber +
+    public Student getStudent(String externalId) throws MalformedURLException, IOException {
+        String query = "?s=" + externalId +
                        "&type=JobSeeker&maxResults=1&current=Current&active=true";
         String stuData = HttpUtils.getDataFromURL(STUDENT_SEARCH_BASE + query);
         LOG.log(Level.FINER, stuData);
         JSONObject jsonStudent = null;
         try {
             jsonStudent = new JSONArray(stuData).getJSONObject(0);
-            if (!jsonStudent.getString("ExternalId").equals(stuNumber)) {
-                throw new NoStudentFoundException("No users with student number " + stuNumber, stuNumber);
+            if (!jsonStudent.getString("ExternalId").equals(externalId)) {
+                throw new NoStudentFoundException("No users with student number " + externalId, externalId);
             }
         } catch (org.json.JSONException je) {
-            throw new NoStudentFoundException("No users with student number " + stuNumber, stuNumber);
+            throw new NoStudentFoundException("No users with student number " + externalId, externalId);
         }
         Student student = new Student();
-        student.setStuNumber(stuNumber);
+        student.setStuNumber(externalId);
         if (!jsonStudent.isNull("FirstName")) {
             student.setFirstName(jsonStudent.getString("FirstName"));
         } else {
@@ -351,9 +346,7 @@ public class CareerHubAPI extends BookingSystemAPI {
     public List<Event> getEventsList() throws MalformedURLException, IOException {
         List<Event> events = new ArrayList<>();
         String venue;
-        Map<String,String> requestHeaders = new HashMap<>();
-        requestHeaders.put("Authorization", "Bearer " + this.getAPIToken("Integrations.Events"));
-        String response = HttpUtils.getDataFromURL(EVENT_API_LIST_URL, requestHeaders); 
+        String response = HttpUtils.getDataFromURL(EVENT_API_LIST_URL, getAPIAuthHeaders()); 
         LOG.log(Level.FINER, response);
         JSONArray jsonEvents = new JSONArray(response);
         for (int i=0; i < jsonEvents.length(); i++) {
@@ -375,10 +368,7 @@ public class CareerHubAPI extends BookingSystemAPI {
 
     @Override
     public Event getEvent(String eventKey) throws IOException {
-        Map<String,String> requestHeaders = new HashMap<>();
-        requestHeaders.put("Authorization", "Bearer " + this.getAPIToken("Integrations.Events"));
-        String response;
-        response = HttpUtils.getDataFromURL(EVENT_API_URL + eventKey, requestHeaders);
+        String response= HttpUtils.getDataFromURL(EVENT_API_URL + eventKey, getAPIAuthHeaders());
         JSONObject jsonEvent = new JSONObject(response);
         String title = jsonEvent.getString("name");
         String startDate = jsonEvent.getString("start");
@@ -415,6 +405,12 @@ public class CareerHubAPI extends BookingSystemAPI {
         JSONObject attendance = jsonEvent.getJSONObject("attendance");
         event.setAttendeeCount(attendance.getInt("attended"));
         return event;
+    }
+    
+    private Map<String,String> getAPIAuthHeaders() throws IOException {
+        Map<String,String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + this.getAPIToken("Integrations.Events"));
+        return requestHeaders;
     }
 
     private String getVerificationToken() throws IOException {
@@ -492,12 +488,11 @@ public class CareerHubAPI extends BookingSystemAPI {
     public String MARK_ATTENDED_URL;
     public String MARK_UNSPECIFIED_URL;
     public String MARK_ABSENT_URL;
-    public String CANCEL_URL;
     public String WAITING_LIST_BASE;
     public String STUDENT_SEARCH_BASE;
     public String EVENT_API_URL;
     public String EVENT_API_LIST_URL;
-    public String EVENT_API_SEARCH_URL;
+    public String EVENT_BOOKING_URL_TEMPL;
     public String EVENT_ADMIN_URL_BASE;
 
     private final String ACTIVE_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";

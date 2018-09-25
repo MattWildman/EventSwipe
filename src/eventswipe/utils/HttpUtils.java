@@ -91,5 +91,19 @@ public class HttpUtils {
         }
         return responseData;
     }
+    
+    public static String sendDeleteRequestToUrl(String url, Map<String,String> headers) throws IOException {
+        HttpURLConnection connection = connectToURL(url, "DELETE", headers);
+        InputStream response = connection.getInputStream();
+        String responseData;
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(response))) {
+            String inputLine;
+            responseData = "";
+            while ((inputLine = in.readLine()) != null) {
+                responseData += inputLine;
+            }
+        }
+        return responseData;
+    }
 
 }

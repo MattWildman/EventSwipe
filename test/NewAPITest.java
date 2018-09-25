@@ -57,7 +57,7 @@ public class NewAPITest {
     @After
     public void tearDown() {
     }
-
+    /*
     @Test
     public void apiLoginTest() throws Exception {
         try {
@@ -66,7 +66,7 @@ public class NewAPITest {
             Logger.getLogger(CareerHubAPITest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    */
     @Test
     public void getTokenTest() {
         String token= "";
