@@ -30,7 +30,7 @@ public class Booking {
     public boolean equals(Object other) {
         return super.equals(other) || 
                ((other.getClass().getName().equals(this.getClass().getName())) && 
-                this.getBookingId().equals(((Booking)other).getBookingId()));
+                this.getStuNumber().equals(((Booking)other).getStuNumber()));
     }
 
     @Override
