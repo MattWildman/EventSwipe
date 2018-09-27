@@ -148,6 +148,17 @@ public abstract class BookingSystemAPI {
     public abstract Booking bookStudent(String studentKey, String eventKey) throws IOException;
     
     /**
+     * Adds a booking to an event.
+     *
+     * @param stuNumber The unique identifier for the attendee in the booking system
+     * @param eventKey   The unique identifier for the event in the booking system
+     * @return           The new Booking object added to the event.
+     * @throws IOException
+     * @see Booking
+     */
+    public abstract Booking bookStudentWithStuNumber(String stuNumber, String eventKey) throws IOException;
+    
+    /**
      * Returns the Student corresponding to the student number in the booking system.
      *
      * @param stuNumber The student number in the booking system (note: this is not the same as the unique identifier)

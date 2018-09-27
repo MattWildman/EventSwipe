@@ -58,7 +58,7 @@ public class CareerHubAPI extends BookingSystemAPI {
         STUDENT_SEARCH_BASE =  ADMIN_URL + "suggest/JobSeeker";
         EVENT_ADMIN_URL_BASE = ADMIN_URL + "event.aspx?id=";
         
-        EVENT_API_URL =      HOST + "api/integrations/v1/events/";
+        EVENT_API_URL = HOST + "api/integrations/v1/events/";
         EVENT_BOOKING_URL_TEMPL = EVENT_API_URL + "bookings/%s/%s";
         EVENT_API_LIST_URL = EVENT_API_URL + "?filterOptions.filterIds=82&filterOptions.filterIds=83&filterOptions.filterOperator=And";
     }
@@ -297,6 +297,17 @@ public class CareerHubAPI extends BookingSystemAPI {
         booking.setId(jsonBooking.getInt("jobSeekerId"));
         booking.setBookingId(jsonBooking.getInt("id"));
         booking.setStatus(jsonBooking.getInt("status"));
+        return booking;
+    }
+    
+    @Override
+    public Booking bookStudentWithStuNumber(String externalId, String eventKey) throws IOException {
+        String url = String.format(EVENT_BOOKING_URL_TEMPL, externalId, eventKey);
+        String response = HttpUtils.sendDataToURL(url, "POST", null, charset, getAPIAuthHeaders());
+        JSONObject jsonResponse = (JSONObject) new JSONObject(response);
+        Booking booking = new Booking(externalId);
+        booking.setId(jsonResponse.getInt("jobSeekerId"));
+        booking.setStatus(this.getUNSPECIFIED_STATUS());
         return booking;
     }
 
