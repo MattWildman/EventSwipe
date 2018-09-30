@@ -38,12 +38,13 @@ public abstract class BookingSystemAPI {
     /**
      * Gets the list of bookings for an event.
      *
-     * @param eventKey The unique identifier for the event in the booking system
-     * @return         A list of Booking objects for that event
+     * @param eventKey   The unique identifier for the event in the booking system
+     * @param sessionKey The identifier for the timeslot session
+     * @return           A list of Booking objects for that event
      * @throws IOException
      * @see Booking
      */
-    public abstract List<Booking> getBookingList(String eventKey) throws IOException;
+    public abstract List<Booking> getBookingList(String eventKey, String sessionKey) throws IOException;
 
     /**
      * Gets the waiting list of students for an event.
@@ -141,22 +142,24 @@ public abstract class BookingSystemAPI {
      *
      * @param studentKey The unique identifier for the attendee in the booking system
      * @param eventKey   The unique identifier for the event in the booking system
+     * @param sessionKey The unique identifier for the timeslot session in the booking system
      * @return           The new Booking object added to the event.
      * @throws IOException
      * @see Booking
      */
-    public abstract Booking bookStudent(String studentKey, String eventKey) throws IOException;
+    public abstract Booking bookStudent(String studentKey, String eventKey, String sessionKey) throws IOException;
     
     /**
      * Adds a booking to an event.
      *
-     * @param stuNumber The unique identifier for the attendee in the booking system
+     * @param stuNumber  The unique identifier for the attendee in the booking system
      * @param eventKey   The unique identifier for the event in the booking system
+     * @param sessionKey The unique identifier for the timeslot session in the booking system
      * @return           The new Booking object added to the event.
      * @throws IOException
      * @see Booking
      */
-    public abstract Booking bookStudentWithStuNumber(String stuNumber, String eventKey) throws IOException;
+    public abstract Booking bookStudentWithStuNumber(String stuNumber, String eventKey, String sessionKey) throws IOException;
     
     /**
      * Returns the Student corresponding to the student number in the booking system.
@@ -190,12 +193,13 @@ public abstract class BookingSystemAPI {
     /**
      * Returns the Event corresponding to the identifier in the booking system.
      *
-     * @param eventKey The unique identifier for the event in the booking system
-     * @return         The corresponding Event object
+     * @param eventKey    The unique identifier for the event in the booking system
+     * @param getBookings A flag indicating whether to also pull in the booking list(s)
+     * @return            The corresponding Event object
      * @throws IOException
      * @see Event
      */
-    public abstract Event getEvent(String eventKey) throws IOException;
+    public abstract Event getEvent(String eventKey, boolean getBookings) throws IOException;
     
     /**
      * Returns the booking system admin URL for the event corresponding to the identifier
@@ -255,6 +259,13 @@ public abstract class BookingSystemAPI {
      * @return       True/false depending on whether the student number is valid
      */
     public abstract boolean isValidStuNum(String stuNum);
+    
+    /**
+     * Returns the api event date format
+     * 
+     * @return a String date format
+     */
+    public abstract String getDateFormat();
 
    /**
      *

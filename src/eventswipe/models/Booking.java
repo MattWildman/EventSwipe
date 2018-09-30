@@ -48,23 +48,6 @@ public class Booking {
     }
 
     /**
-     * @return The number of the entry slot the booking is for (when recording attendance for a multi-slot event)
-     */
-    public Integer getEntrySlot() {
-        return entrySlot;
-    }
-
-    /**
-     * Sets the entry slot the booking is for
-     * (when recording attendance for a multi-slot event).
-     *
-     * @param entrySlot The number of the event entry slot
-     */
-    public void setEntrySlot(Integer entrySlot) {
-        this.entrySlot = entrySlot;
-    }
-
-    /**
      * @return True/false depending on whether the attendee with the booking has booked for the event
      */
     public boolean isBooked() {
@@ -192,6 +175,20 @@ public class Booking {
     public void setStatus(Integer status) {
         this.status = status;
     }
+    
+    /**
+     * @return the session id the booking is attached to
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * @param sessionId the session id the booking is attached to
+     */
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
 
     private void setStuNumber(String stuNumber) {
         this.stuNumber = stuNumber;
@@ -199,15 +196,14 @@ public class Booking {
 
     private String stuNumber = "";
     private Integer bookingId = 0;
+    private String sessionId;
     private Integer id;
     private String firstName;
     private String lastName = "";
     private Integer status;
-    
-    private Integer entrySlot;
 
     private boolean booked;
     private boolean alreadyRecorded;
     private boolean onWaitingList;
-
+    
 }
