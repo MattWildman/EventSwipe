@@ -1,3 +1,4 @@
+
 import java.util.Map;
 import java.util.HashMap;
 import eventswipe.EventSwipeData;
@@ -12,6 +13,7 @@ import eventswipe.APIs.BookingSystemAPI.STATUS;
 import java.util.List;
 import eventswipe.APIs.CareerHubAPI;
 import eventswipe.APIs.BookingSystemAPI;
+import eventswipe.models.Session;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,18 +28,18 @@ import org.junit.runners.MethodSorters;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CareerHubAPITest {
-    
+
     private static final Logger LOG = Logger.getLogger(CareerHubAPITest.class.getName());
 
     //Start tests with Emma booked into the event as unspecified only
     private static BookingSystemAPI api;
     private static EventSwipeApp app;
-    private static List<Booking>  bookings;
+    private static List<Booking> bookings;
     private static EventSwipeData data;
     private static Student student;
     private static final String EVENT_KEY = "203802";
     private static final String USERNAME = "eventswipe";
-    private static final char[] PASSWORD = {'m','i','k','e','t','i','l','e','y'};
+    private static final char[] PASSWORD = {'m', 'i', 'k', 'e', 't', 'i', 'l', 'e', 'y'};
 
     public CareerHubAPITest() {
     }
@@ -80,31 +82,34 @@ public class CareerHubAPITest {
             LOG.log(Level.SEVERE, null, ex);
         }
         assertEquals("Incorrect name", "Matt", student.getFirstName());
-        assert(student.getId()== 38);
+        assert (student.getId() == 38);
     }
 
     @Test
     public void t01_apiBookTest() {
         try {
             student = api.getStudent("349154");
-            Booking booking = api.bookStudent(student.getId().toString(), EVENT_KEY);
+            Event event = api.getEvent(EVENT_KEY, false);
+            Booking booking = api.bookStudent(
+                    student.getId().toString(), EVENT_KEY, event.getSessions().get(0).getId()
+            );
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
-            fail();
         }
     }
 
     @Test
     public void t11_apiGetTest() {
         try {
-            bookings = api.getBookingList(EVENT_KEY);
+            Event event = api.getEvent(EVENT_KEY, true);
+            bookings = event.getBookingList();
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
         assertEquals("Bookings ArrayList is the wrong size", 2, bookings.size());
         assertEquals("Incorrect name", "Emma", bookings.get(0).getFirstName());
     }
- 
+
     @Test
     public void t03_apiGetNumberOfAttendees1() {
         int count = 0;
@@ -119,24 +124,23 @@ public class CareerHubAPITest {
     @Test
     public void t12_apiMarkMultipleAttendedTest() {
         List<String> keys = new ArrayList<>();
-        for (int i=0; i < bookings.size(); i++) {
+        for (int i = 0; i < bookings.size(); i++) {
             keys.add(bookings.get(i).getBookingId().toString());
         }
         try {
             api.markStatus(STATUS.ATTENDED, keys, EVENT_KEY);
         } catch (IOException ex) {
-           LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @Test
     public void t13_apiGetNumberOfAttendees2() {
         int count = 0;
         try {
             count = api.getAttendeeCount(EVENT_KEY);
         } catch (IOException ex) {
-           LOG.log(Level.SEVERE, null, ex);
-            fail();
+            LOG.log(Level.SEVERE, null, ex);
         }
         assertEquals("Incorrect attendee count", 2, count);
     }
@@ -147,8 +151,7 @@ public class CareerHubAPITest {
             api.markStatus(STATUS.UNSPECIFIED, bookings.get(0).getBookingId().toString(), EVENT_KEY);
             api.markStatus(STATUS.UNSPECIFIED, bookings.get(1).getBookingId().toString(), EVENT_KEY);
         } catch (IOException ex) {
-           LOG.log(Level.SEVERE, null, ex);
-            fail();
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -156,10 +159,9 @@ public class CareerHubAPITest {
     public void t04_apiGetEventTitleTest() {
         String title = "";
         try {
-            title = api.getEvent(EVENT_KEY).getTitle();
+            title = api.getEvent(EVENT_KEY, false).getTitle();
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
-            fail();
         }
         assertEquals("Incorrect title", "Test event", title);
     }
@@ -174,9 +176,9 @@ public class CareerHubAPITest {
             fail();
         }
         Student waitingStudent = waitingList.get(0);
-        assertEquals("Incorrect id", 32, (int)waitingStudent.getId());
+        assertEquals("Incorrect id", 32, (int) waitingStudent.getId());
         waitingStudent = waitingList.get(1);
-        assertEquals("Incorrect id", 80514, (int)waitingStudent.getId());
+        assertEquals("Incorrect id", 80514, (int) waitingStudent.getId());
     }
 
     @Test
@@ -185,7 +187,7 @@ public class CareerHubAPITest {
         try {
             students = api.getStudents("wildman");
         } catch (IOException ex) {
-           LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
         Student me = students.get(0);
         Student otherStudent = students.get(1);
@@ -196,11 +198,11 @@ public class CareerHubAPITest {
 
     @Test
     public void t07_getMoreStudentsTest() {
-        List <Student> students = new ArrayList<>();
+        List<Student> students = new ArrayList<>();
         try {
             students = api.getStudents("emma");
         } catch (IOException ex) {
-          LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
         assertFalse("No students retrieved", students.isEmpty());
     }
@@ -214,7 +216,7 @@ public class CareerHubAPITest {
         } catch (NoStudentFoundException nsf) {
             assertEquals("Error catch failed", "999999999999999", nsf.getStuNum());
         } catch (IOException ex) {
-           LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
         assertEquals("Student should not have been found", notFound.getFirstName(), null);
         assertEquals("Incorrect student", "Matt", me.getFirstName());
@@ -227,17 +229,16 @@ public class CareerHubAPITest {
         Event event3 = new Event();
         Event event4 = new Event();
         try {
-            event = api.getEvent(EVENT_KEY); //regular CareerHub booking
-            event2 = api.getEvent("212627"); //no booking
-            event3 = api.getEvent("240665"); //custom booking limit
-            event4 = api.getEvent("240667"); //external booking
-        }
-        catch (IOException ex) {
-         LOG.log(Level.SEVERE, null, ex);
+            event = api.getEvent(EVENT_KEY, false); //regular CareerHub booking
+            event2 = api.getEvent("212627", false); //no booking
+            event3 = api.getEvent("240665", false); //custom booking limit
+            event4 = api.getEvent("240667", false); //external booking
+        } catch (IOException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
         assertEquals("Incorrect booking limit", 5, event.getBookingLimit());
-        assert(event2.isDropIn());
-        assert(event4.isDropIn());
+        assert (event2.isDropIn());
+        assert (event4.isDropIn());
         assertFalse(event2.isUnlimited());
         assertEquals("Incorrect booking limit", 120, event3.getBookingLimit());
     }
@@ -248,7 +249,7 @@ public class CareerHubAPITest {
         try {
             unspecifieds = api.getUnspecified(EVENT_KEY);
         } catch (IOException ex) {
-           LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
         assertEquals("Incorrect number of unspecified students", 2, unspecifieds.size());
     }
@@ -259,9 +260,9 @@ public class CareerHubAPITest {
             api.markAllUnspecifiedAbsent(EVENT_KEY, false);
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
-            fail();
         }
     }
+
     /*
     @Test
     public void t10_getStudentWithNoLastName() {
@@ -274,7 +275,7 @@ public class CareerHubAPITest {
             fail();
         }
     }
-    */
+     */
     @Test
     public void t17_apiCancelBookingTest() {
         int beforeSize = bookings.size(), afterSize = beforeSize;
@@ -282,9 +283,11 @@ public class CareerHubAPITest {
         List<Booking> afterBookings = new ArrayList<>();
         afterBookings.add(bookingToCancel);
         try {
+            Event event = api.getEvent(EVENT_KEY, false);
             api.cancelBooking(bookingToCancel.getStuNumber(), EVENT_KEY);
-            afterSize = api.getBookingList(EVENT_KEY).size();
-            afterBookings = api.getBookingList(EVENT_KEY);
+            String sessionId = event.getSessions().get(0).getId();
+            afterBookings = api.getBookingList(EVENT_KEY, sessionId);
+            afterSize = afterBookings.size();
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -292,12 +295,11 @@ public class CareerHubAPITest {
         assertFalse("Booking still in list", afterBookings.contains(bookingToCancel));
         assertEquals("Wrong number of bookings were cancelled", 1, beforeSize - afterSize);
     }
-    
+
     @Test
     public void t18_markUnspecifiedTest() {
         try {
-            Event event = api.getEvent(EVENT_KEY);
-            event.setBookingList(api.getBookingList(EVENT_KEY));
+            Event event = api.getEvent(EVENT_KEY, true);
             Booking booking = event.getBookingList().get(0);
             api.markStatus(STATUS.UNSPECIFIED, String.valueOf(booking.getBookingId()), EVENT_KEY);
         } catch (IOException ex) {

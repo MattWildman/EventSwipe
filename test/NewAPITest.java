@@ -45,6 +45,7 @@ public class NewAPITest {
 
         data.setCustomProperties(pMap);
         api.init();
+        api.logIn(USERNAME, PASSWORD);
     }
 
     @AfterClass
@@ -99,7 +100,7 @@ public class NewAPITest {
     public void getEvent() {
         Event event = new Event();
         try {
-            event = api.getEvent("203802");
+            event = api.getEvent("203802", true);
         } catch (IOException ex) {
             Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -111,8 +112,8 @@ public class NewAPITest {
         Event aEvent = new Event();
         Event iEvent = new Event();
         try {
-            aEvent = api.getEvent("260975");
-            iEvent = api.getEvent("260972");
+            aEvent = api.getEvent("260975", false);
+            iEvent = api.getEvent("260972", false);
         } catch (IOException ex) {
             Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -133,8 +134,7 @@ public class NewAPITest {
         Event event;
         Booking booking = new Booking("349154");
             try {
-                event = api.getEvent("203802");
-                event.setBookingList(api.getBookingList(event.getId()));
+                event = api.getEvent("203802", true);
                 System.out.println("Bookings: " + event.getBookingList().size());
                 Date now = new Date();
                 System.out.println("Now: " + now);
@@ -170,9 +170,10 @@ public class NewAPITest {
         String eventKey = "203802";
         Booking unspecified = null, attended = null, absent = null, not_booked = null;
         try {
+            Event event = api.getEvent(eventKey, true);
             attended = api.getBooking("123456", eventKey);
             not_booked = api.getBooking("349154", eventKey);
-            Booking booking = api.getBookingList(eventKey).get(0);
+            Booking booking = event.getBookingList().get(0);
             String bookingId = String.valueOf(booking.getBookingId());
             String externalId = booking.getStuNumber();
             api.markStatus(STATUS.ABSENT, bookingId, eventKey);

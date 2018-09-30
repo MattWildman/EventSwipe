@@ -78,7 +78,7 @@ public class EventSwipeView extends FrameView {
             System.err.println(e.getMessage());
         }
         this.getFrame().setPreferredSize(new Dimension(750, 500));
-        this.getFrame().setResizable(false);
+        this.getFrame().setResizable(true);
         usernameInput.requestFocusInWindow();
         buildCounterMap();
         updateBookingPanel(true);
@@ -3404,9 +3404,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
         }
         else {
             Event event = new Event();
-            event.setSlot(1);
             event.setTitle(eventTitleInput.getText());
-            event.setBookingList(new ArrayList<Booking>());
             app.addEvent(event);
         }
 
@@ -3435,8 +3433,8 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
             String id = idInput.getText();
             if (!(id.equals(idInputDefault) || id.equals(""))) {
                 try {
-                    Event slot = app.loadEvent(id, i + 1, useWaitingList);
-                    int bookingCount = slot.getBookingList().size(),
+                    Event slot = app.loadEvent(id, useWaitingList);
+                    int bookingCount = slot.getBookingCount(),
                         bookingLimit = slot.getBookingLimit();
                     if (slot.isDropIn()) {
                         Object[] options = {"Go to event", "Cancel"};
@@ -3542,7 +3540,16 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
     private void updateBookingStatus(Booking booking) {
         String stuNumber = booking.getStuNumber();
         String message = "Student " + stuNumber;
-        String slot = app.isSingleSlot() ? "N/A" : booking.getEntrySlot().toString();
+        Event event = app.getEvent();
+        String slot = "N/A";
+        if (!app.isSingleSlot() && null != booking.getSessionId()) {
+            for (Session s: event.getSessions()) {
+                if (s.getId().equals(booking.getSessionId())) {
+                    slot = null != s.getStart() ?
+                           Utils.getTimeString(s.getStart()) : s.getId();
+                }
+            }
+        }
         slot = booking.isOnWaitingList() ? "W/L" : slot;
         String bookingStatus = "";
         if (booking.isAlreadyRecorded()) {
@@ -3559,7 +3566,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                                                       "Student too early",
                                                       JOptionPane.YES_NO_OPTION);
             if (reply == JOptionPane.YES_OPTION) {
-                app.addToEarlyList(stuNumber, booking.getEntrySlot());
+                app.addToEarlyList(stuNumber);
                 bookingStatus = "Booked";
                 message += " has been recorded";
             }
@@ -3724,7 +3731,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                                                  options[0]);
         if (reply == JOptionPane.YES_OPTION) {
             try {
-                browseToUrl(app.getAdminEventURL(app.getEvent(0).getId()));
+                browseToUrl(app.getAdminEventURL(app.getEvent().getId()));
             } catch (IOException ex) {
                 Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                 app.getLogger().logException(ex);
@@ -3859,7 +3866,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
 
     private boolean eventNotNull() {
         try {
-            Event e = app.getData().getEvents().get(0);
+            Event e = app.getData().getEvent();
             return !e.getId().isEmpty();
         } catch (NullPointerException ex) {
             return false;

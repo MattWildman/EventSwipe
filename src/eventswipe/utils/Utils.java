@@ -73,6 +73,11 @@ public class Utils {
         cal.add(Calendar.MINUTE, mins);
         return cal.getTime();
     }
+    
+    public static String getTimeString(Date date) {
+        DateFormat timeFormat = new SimpleDateFormat("HH:mm");
+        return timeFormat.format(date);
+    }
 
     public static String readLine(File file, String encoding) {
         String line = "";
