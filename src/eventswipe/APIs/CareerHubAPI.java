@@ -277,18 +277,18 @@ public class CareerHubAPI extends BookingSystemAPI {
         JSONObject jsonBooking = (JSONObject) new JSONObject(bookingDetails).get("booking");
         LOG.log(Level.FINER, jsonBooking.toString());
         Booking booking = new Booking(jsonBooking.getString("externalId"));
-
         if (!jsonBooking.isNull("firstName")) {
             booking.setFirstName(jsonBooking.getString("firstName"));
-        } else {
+        } 
+        else {
             booking.setFirstName("");
         }
         if (!jsonBooking.isNull("lastName")) {
             booking.setLastName(jsonBooking.getString("lastName"));
-        } else {
+        } 
+        else {
             booking.setLastName("");
         }
-
         booking.setId(jsonBooking.getInt("jobSeekerId"));
         booking.setBookingId(jsonBooking.getInt("id"));
         booking.setStatus(jsonBooking.getInt("status"));
@@ -298,7 +298,7 @@ public class CareerHubAPI extends BookingSystemAPI {
     @Override
     public Booking bookStudentWithStuNumber(String externalId, String eventKey, String sessionId) throws IOException {
         String url = String.format(EVENT_BOOKING_URL_TEMPL, externalId, eventKey, sessionId);
-        String response = HttpUtils.sendDataToURL(url, "POST", null, charset, getAPIAuthHeaders());
+        String response = HttpUtils.sendDataToURL(url, "POST", " ", charset, getAPIAuthHeaders());
         JSONObject jsonResponse = (JSONObject) new JSONObject(response);
         Booking booking = new Booking(externalId);
         booking.setId(jsonResponse.getInt("jobSeekerId"));
