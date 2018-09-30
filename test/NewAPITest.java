@@ -182,12 +182,21 @@ public class NewAPITest {
             unspecified = api.getBooking(externalId, eventKey);
         } catch (IOException ex) {
             Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
         }
         assert(attended.getStatus() == api.getATTENDED_STATUS());
         assert(not_booked.getStatus() == api.getNOT_BOOKED_STATUS());
         assert(absent.getStatus() == api.getABSENT_STATUS());
         assert(unspecified.getStatus() == api.getUNSPECIFIED_STATUS());
+    }
+    
+    @Test
+    public void bookWithStuNumberTest() {
+        String eventKey = "539797";
+        try {
+            api.bookStudentWithStuNumber("349154", eventKey, "7352");
+        } catch (IOException ex) {
+            Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }
