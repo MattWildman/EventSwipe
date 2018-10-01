@@ -15,7 +15,7 @@ import java.util.Map;
 public class EventSwipeData {
 
     /**
-     * The maximum entry slots of a multi-slot event.
+     * The maximum entry slots of a multi-slot offline event.
      */
     public static final int MAX_ENTRY_SLOTS = 5;
 
@@ -63,18 +63,21 @@ public class EventSwipeData {
      * @return The List of Events running (multiple when recording attendance for a multi-slot event)
      * @see Event
      */
-    public List<Event> getEvents() {
-        return events;
+    public Event getEvent() {
+        if (null == event.getTitle()) {
+            event.setTitle(eventTitle);
+        }
+        return event;
     }
 
     /**
      * Sets the List of Events running (multiple when recording attendance for a multi-slot event)
      *
-     * @param events A List of Events
+     * @param event The Event you are recording attendance for
      * @see Event
      */
-    public void setEvents(List<Event> events) {
-        this.events = events;
+    public void setEvent(Event event) {
+        this.event = event;
     }
 
     /**
@@ -85,7 +88,7 @@ public class EventSwipeData {
      */
     public void addEvent(Event event) {
         this.initialiseAttendees(event);
-        events.add(event);
+        this.event = event;
     }
 
     /**
@@ -146,7 +149,7 @@ public class EventSwipeData {
         setSlots(0);
         setEventTitle("");
         clearList(allFileBookedList);
-        events.clear();
+        event = null;
     }
 
     /**
@@ -370,11 +373,7 @@ public class EventSwipeData {
      * @return The number of bookings for all event entry slots
      */
     public Integer getBookingCount() {
-        int c = 0;
-        for (Event e : events) {
-            c += e.getBookingList().size();
-        }
-        return c;
+        return event.getBookingCount();
     }
 
     /**
@@ -388,22 +387,14 @@ public class EventSwipeData {
      * @return The number of saved attendees for all event entry slots
      */
     public Integer getSavedCount() {
-        int c = 0;
-        for (Event e : events) {
-            c += e.getAttendeeCount();
-        }
-        return c;
+        return event.getAttendeeCount();
     }
 
     /**
      * @return The number of unsaved attendees for all event entry slots
      */
     public Integer getUnsavedCount() {
-        int c = 0;
-        for (Event e : events) {
-            c += e.getUnsavedList().size();
-        }
-        return c;
+        return event.getUnsavedList().size();
     }
 
     /**
@@ -418,14 +409,10 @@ public class EventSwipeData {
      * @return The number of free places in all event entry slots
      */
     public Integer getCurrentNumberOfPlaces() {
-        int limit = 0;
-        for (Event e : events) {
-            if (e.isUnlimited() || e.isDropIn()) {
-                return -1;
-            }
-            limit += e.getBookingLimit();
+        if (event.isUnlimited() || event.isDropIn()) {
+            return -1;
         }
-        return limit - this.getAttendeeCount();
+        return event.getBookingLimit() - event.getAttendeeCount();
     }
 
     /**
@@ -454,7 +441,7 @@ public class EventSwipeData {
         count = c;
     }
 
-    private List<Event> events = new ArrayList<>();
+    private Event event;
 
     private List<String> allFileBookedList;
 
@@ -479,12 +466,12 @@ public class EventSwipeData {
     private static EventSwipeData instance = null;
 
     private void initialiseAttendees(Event event) {
-        if (this.isOnlineMode() && !event.isDropIn() && event.getBookingList().size() > 0) {
+        if (this.isOnlineMode() && !event.isDropIn() && event.getAttendeeCount() > 0) {
             for (Booking b : event.getBookingList()) {
                 if (b.getStatus() == ATTENDED_STATUS) {
                     this.getAllRecordedList().add(b.getStuNumber());
                 }
-            }
+            } 
         }
     }
     
