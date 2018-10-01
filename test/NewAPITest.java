@@ -109,18 +109,18 @@ public class NewAPITest {
 
     @Test
     public void eventDateTest() {
-        Event aEvent = new Event();
-        Event iEvent = new Event();
+        Event gmtEvent = new Event();
+        Event bstEvent = new Event();
         try {
-            aEvent = api.getEvent("260975", false);
-            iEvent = api.getEvent("260972", false);
+            gmtEvent = api.getEvent("479656", false);
+            bstEvent = api.getEvent("203802", false);
         } catch (IOException ex) {
             Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("Active date: " + aEvent.getStartDate());
-        System.out.println("Active regs: " + aEvent.getRegStart());
-        System.out.println("Inactive date: " + iEvent.getStartDate());
-        System.out.println("Inactive regs: " + iEvent.getRegStart());
+        System.out.println("GMT date: " + gmtEvent.getStartDate());
+        System.out.println("GMT regs: " + gmtEvent.getRegStart());
+        System.out.println("BST date: " + bstEvent.getStartDate());
+        System.out.println("BST regs: " + bstEvent.getRegStart());
     }
 
     @Test

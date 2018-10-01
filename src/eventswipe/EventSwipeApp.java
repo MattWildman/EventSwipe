@@ -296,6 +296,10 @@ public class EventSwipeApp extends SingleFrameApplication {
                                 bookingFin.setBookingId(newId);
                                 recordAttendance(bookingFin);
                                 return;
+                            } catch (EventFullException efe) {
+                                event.getUnsavedList().add(stuNumberFin);
+                                data.setSavedFlag(false);
+                                throw efe;
                             } catch (IOException ex) {
                                 Logger.getLogger(EventSwipeApp.class.getName())
                                     .log(Level.SEVERE, "Student not booked", ex);
@@ -305,7 +309,6 @@ public class EventSwipeApp extends SingleFrameApplication {
                             }
                         }
                     }
-                    
                 }
             });
         }

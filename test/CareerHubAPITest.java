@@ -13,7 +13,6 @@ import eventswipe.APIs.BookingSystemAPI.STATUS;
 import java.util.List;
 import eventswipe.APIs.CareerHubAPI;
 import eventswipe.APIs.BookingSystemAPI;
-import eventswipe.models.Session;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;

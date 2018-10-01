@@ -2,7 +2,6 @@ package eventswipe;
 
 import eventswipe.models.Booking;
 import eventswipe.models.Event;
-import eventswipe.models.Session;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.Map;
 public class EventSwipeData {
 
     /**
-     * The maximum entry slots of a multi-slot event.
+     * The maximum entry slots of a multi-slot offline event.
      */
     public static final int MAX_ENTRY_SLOTS = 5;
 
