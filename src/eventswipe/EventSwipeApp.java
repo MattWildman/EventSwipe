@@ -219,21 +219,6 @@ public class EventSwipeApp extends SingleFrameApplication {
         return api.isValidStuNum(id);
     }
 
-    private Booking getBooking(String stuNumber) throws MalformedURLException, IOException {
-        for (Event event : data.getEvents()) {
-            for (Booking booking : event.getBookingList()) {
-                if (booking.getStuNumber().equals(stuNumber)) {
-                    booking.setEntrySlot(event.getSlot());
-                    return booking;
-                }
-            }
-        }
-        Booking newBooking = new Booking(stuNumber);
-        bookStudent(stuNumber, newBooking);
-        newBooking.setEntrySlot(0);
-        return newBooking;
-    }
-
     public Booking checkBooking(String stuNumber) throws MalformedURLException, IOException {
         Booking bookingResult = new Booking(stuNumber);
         int slot = 0;
@@ -286,6 +271,21 @@ public class EventSwipeApp extends SingleFrameApplication {
             recordAttendance(bookingResult);
         }
         return bookingResult;
+    }
+    
+    private Booking getBooking(String stuNumber) throws MalformedURLException, IOException {
+        for (Event event : data.getEvents()) {
+            for (Booking booking : event.getBookingList()) {
+                if (booking.getStuNumber().equals(stuNumber)) {
+                    booking.setEntrySlot(event.getSlot());
+                    return booking;
+                }
+            }
+        }
+        Booking newBooking = new Booking(stuNumber);
+        bookStudent(stuNumber, newBooking);
+        newBooking.setEntrySlot(0);
+        return newBooking;
     }
 
     public void bookStudent(String stuNumber, Booking booking) throws MalformedURLException, IOException {
