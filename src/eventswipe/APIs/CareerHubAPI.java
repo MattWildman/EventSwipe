@@ -13,7 +13,6 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -177,7 +176,6 @@ public class CareerHubAPI extends BookingSystemAPI {
     public Booking getBooking(String externalId, String eventKey) throws IOException {
         String requestUrl = String.format(EVENT_BOOKING_URL_TEMPL, externalId, eventKey, "");
         String response = HttpUtils.getDataFromURL(requestUrl, getAPIAuthHeaders());
-        System.out.println(response);
         Booking booking = new Booking(externalId);
         JSONObject statusObject = new JSONObject(response);
         int status;
@@ -229,7 +227,10 @@ public class CareerHubAPI extends BookingSystemAPI {
         postData += "}";
         url += eventKey + "?sessionId="; //intentionally empty query parameter
         try {
-            HttpUtils.sendDataToURL(url, "POST", postData, this.getCharset(), requestHeaders);
+            String response = HttpUtils.sendDataToURL(url, "POST", postData, this.getCharset(), requestHeaders);
+            if (response.equals("{\"error\":\"You can only set attendance from an hour before the event starts\"}")) {
+                throw new EarlyRegistrationException("Too early to mark as attended");
+            }
         }
         catch (IOException ioe) {
             if (ioe.getMessage().equals("Server returned HTTP response code: 400 for URL: " +
@@ -298,6 +299,18 @@ public class CareerHubAPI extends BookingSystemAPI {
     @Override
     public Booking bookStudentWithStuNumber(String externalId, String eventKey, String sessionId) throws IOException {
         String url = String.format(EVENT_BOOKING_URL_TEMPL, externalId, eventKey, sessionId);
+        try {
+            String response = HttpUtils.sendDataToURL(url, "POST", " ", charset, getAPIAuthHeaders());
+            JSONObject jsonResponse = (JSONObject) new JSONObject(response);
+            Booking booking = new Booking(externalId);
+            booking.setId(jsonResponse.getInt("jobSeekerId"));
+            booking.setStatus(this.getUNSPECIFIED_STATUS());
+        return booking;
+        } catch (IOException ioe) {
+            if (ioe.getMessage().startsWith("Server returned HTTP response code: 500 for URL:")) {
+                throw new EventFullException("Event is fully booked", externalId);
+            }
+        }
         String response = HttpUtils.sendDataToURL(url, "POST", " ", charset, getAPIAuthHeaders());
         JSONObject jsonResponse = (JSONObject) new JSONObject(response);
         Booking booking = new Booking(externalId);
@@ -420,10 +433,9 @@ public class CareerHubAPI extends BookingSystemAPI {
         startDate = this.prepareActiveDateStr(startDate);
         event.setStartDate(Utils.strToDate(startDate, ACTIVE_DATE_FORMAT));
         event.setBookingLimit(0);
+        event.setRegStart(Utils.subtractMins(event.getStartDate(), 60));
         Integer bookingType = jsonEvent.getInt("bookingType");
         if (bookingType == 1) { //CH booking
-            int regPeriod = Calendar.getInstance().getTimeZone().useDaylightTime() ? 120 : 60;
-            event.setRegStart(Utils.subtractMins(event.getStartDate(), regPeriod));
             event.setBookingList(new ArrayList<Booking>());
             JSONObject settings = jsonEvent.getJSONObject("bookingSettings");
             if (settings.isNull("bookingLimit")) {
