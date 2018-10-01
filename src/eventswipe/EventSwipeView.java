@@ -564,6 +564,7 @@ public class EventSwipeView extends FrameView {
             }
         });
 
+        titleLabel.setFont(resourceMap.getFont("aboutEventLabel.font")); // NOI18N
         titleLabel.setText(resourceMap.getString("titleLabel.text")); // NOI18N
         titleLabel.setName("titleLabel"); // NOI18N
 
@@ -1125,7 +1126,7 @@ public class EventSwipeView extends FrameView {
         configPanelLayout.setVerticalGroup(
             configPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(configPanelLayout.createSequentialGroup()
-                .addContainerGap(115, Short.MAX_VALUE)
+                .addContainerGap(113, Short.MAX_VALUE)
                 .addComponent(titleLabel)
                 .addGap(1, 1, 1)
                 .addComponent(eventTitlePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -2883,7 +2884,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                 goToSettings();
             }
             else if(reply == JOptionPane.NO_OPTION) {
-                switchToPanel(offlinePanel);
+                switchToPanel(configPanel);
             }
         } catch (HeadlessException | IOException e) {
             JOptionPane.showMessageDialog(app.getMainFrame(),
