@@ -57,7 +57,7 @@ public class NewAPITest {
     @After
     public void tearDown() {
     }
-
+    /*
     @Test
     public void apiLoginTest() throws Exception {
         try {
@@ -66,7 +66,7 @@ public class NewAPITest {
             Logger.getLogger(CareerHubAPITest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    */
     @Test
     public void getTokenTest() {
         String token= "";
@@ -163,6 +163,30 @@ public class NewAPITest {
                 Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
                 fail("Error setting up the event");
             }
+    }
+    
+    @Test
+    public void checkStatusTest() {
+        String eventKey = "203802";
+        Booking unspecified = null, attended = null, absent = null, not_booked = null;
+        try {
+            attended = api.getBooking("123456", eventKey);
+            not_booked = api.getBooking("349154", eventKey);
+            Booking booking = api.getBookingList(eventKey).get(0);
+            String bookingId = String.valueOf(booking.getBookingId());
+            String externalId = booking.getStuNumber();
+            api.markStatus(STATUS.ABSENT, bookingId, eventKey);
+            absent = api.getBooking(externalId, eventKey);
+            api.markStatus(STATUS.UNSPECIFIED, bookingId, eventKey);
+            unspecified = api.getBooking(externalId, eventKey);
+        } catch (IOException ex) {
+            Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        }
+        assert(attended.getStatus() == api.getATTENDED_STATUS());
+        assert(not_booked.getStatus() == api.getNOT_BOOKED_STATUS());
+        assert(absent.getStatus() == api.getABSENT_STATUS());
+        assert(unspecified.getStatus() == api.getUNSPECIFIED_STATUS());
     }
 
 }

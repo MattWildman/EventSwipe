@@ -1,5 +1,7 @@
 package eventswipe.models;
 
+import java.util.Objects;
+
 /**
  * Contains the student and event data for a particular booking.
  * <p>
@@ -22,6 +24,20 @@ public class Booking {
      */
     public Booking(String stuNumber) {
         setStuNumber(stuNumber);
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        return super.equals(other) || 
+               ((other.getClass().getName().equals(this.getClass().getName())) && 
+                this.getStuNumber().equals(((Booking)other).getStuNumber()));
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 41 * hash + Objects.hashCode(this.bookingId);
+        return hash;
     }
 
     /**

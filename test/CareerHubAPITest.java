@@ -277,12 +277,20 @@ public class CareerHubAPITest {
     */
     @Test
     public void t17_apiCancelBookingTest() {
+        int beforeSize = bookings.size(), afterSize = beforeSize;
+        Booking bookingToCancel = bookings.get(1);
+        List<Booking> afterBookings = new ArrayList<>();
+        afterBookings.add(bookingToCancel);
         try {
-            api.cancelBooking(bookings.get(1).getBookingId().toString(), EVENT_KEY);
+            api.cancelBooking(bookingToCancel.getStuNumber(), EVENT_KEY);
+            afterSize = api.getBookingList(EVENT_KEY).size();
+            afterBookings = api.getBookingList(EVENT_KEY);
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
+        assertFalse("Booking still in list", afterBookings.contains(bookingToCancel));
+        assertEquals("Wrong number of bookings were cancelled", 1, beforeSize - afterSize);
     }
     
     @Test
