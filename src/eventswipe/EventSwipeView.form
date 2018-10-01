@@ -175,6 +175,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="titleLabel">
           <Properties>
+            <Property name="font" type="java.awt.Font" resourceKey="aboutEventLabel.font"/>
             <Property name="text" type="java.lang.String" resourceKey="titleLabel.text"/>
             <Property name="name" type="java.lang.String" value="titleLabel" noResource="true"/>
           </Properties>
