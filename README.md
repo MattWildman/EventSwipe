@@ -90,7 +90,7 @@ EventSwipe can read ID strings from a .txt file separated by line breaks. Make s
 
 You can upload up to three booking list files (for different timeslots within the same event) and a waiting list.
 
-###Running the application
+### Running the application
 
 When you start up EventSwipe, you'll be asked to log in using your CareerHub details, or to start offline mode.
 
@@ -130,8 +130,6 @@ If something went wrong during your attendance recording or you let in early arr
 
 ### Goshawk
 
-*Expected release: January 2018*
-
 Features
 
 * Booking list auto-refreshing
@@ -139,8 +137,6 @@ Features
 * Improved logging
 
 ### Hen Harrier
-
-*Expected release: June 2018*
 
 Features
 
