@@ -1,5 +1,7 @@
 package eventswipe.models;
 
+import java.util.Objects;
+
 /**
  * Contains the student and event data for a particular booking.
  * <p>
@@ -23,29 +25,26 @@ public class Booking {
     public Booking(String stuNumber) {
         setStuNumber(stuNumber);
     }
+    
+    @Override
+    public boolean equals(Object other) {
+        return super.equals(other) || 
+               ((other.getClass().getName().equals(this.getClass().getName())) && 
+                this.getStuNumber().equals(((Booking)other).getStuNumber()));
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 41 * hash + Objects.hashCode(this.bookingId);
+        return hash;
+    }
 
     /**
      * @return The student number String of the attendee with the booking
      */
     public String getStuNumber() {
         return stuNumber;
-    }
-
-    /**
-     * @return The number of the entry slot the booking is for (when recording attendance for a multi-slot event)
-     */
-    public Integer getEntrySlot() {
-        return entrySlot;
-    }
-
-    /**
-     * Sets the entry slot the booking is for
-     * (when recording attendance for a multi-slot event).
-     *
-     * @param entrySlot The number of the event entry slot
-     */
-    public void setEntrySlot(Integer entrySlot) {
-        this.entrySlot = entrySlot;
     }
 
     /**
@@ -176,6 +175,20 @@ public class Booking {
     public void setStatus(Integer status) {
         this.status = status;
     }
+    
+    /**
+     * @return the session id the booking is attached to
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * @param sessionId the session id the booking is attached to
+     */
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
 
     private void setStuNumber(String stuNumber) {
         this.stuNumber = stuNumber;
@@ -183,15 +196,14 @@ public class Booking {
 
     private String stuNumber = "";
     private Integer bookingId = 0;
+    private String sessionId;
     private Integer id;
     private String firstName;
     private String lastName = "";
     private Integer status;
-    
-    private Integer entrySlot;
 
     private boolean booked;
     private boolean alreadyRecorded;
     private boolean onWaitingList;
-
+    
 }

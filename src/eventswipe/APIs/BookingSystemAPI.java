@@ -2,7 +2,6 @@ package eventswipe.APIs;
 
 import eventswipe.models.*;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 
 /**
@@ -23,86 +22,90 @@ public abstract class BookingSystemAPI {
      * @param username Booking system username
      * @param password Booking system password
      * @return         True/false depending on log in success
-     * @throws MalformedURLException
      * @throws IOException
      */
-    public abstract boolean logIn(String username, char[] password) throws MalformedURLException, IOException;
+    public abstract boolean logIn(String username, char[] password) throws IOException;
 
     /**
      * Gets an API token from the booking system to access protected data.
      *
      * @param scope The scope you want access to (eg. "Public.Events")
      * @return      The token to use in API calls
-     * @throws MalformedURLException
      * @throws IOException
      */
-    public abstract String getAPIToken(String scope) throws MalformedURLException, IOException;
+    public abstract String getAPIToken(String scope) throws IOException;
     
     /**
      * Gets the list of bookings for an event.
      *
-     * @param eventKey The unique identifier for the event in the booking system
-     * @return         A list of Booking objects for that event
-     * @throws MalformedURLException
+     * @param eventKey   The unique identifier for the event in the booking system
+     * @param sessionKey The identifier for the timeslot session
+     * @return           A list of Booking objects for that event
      * @throws IOException
      * @see Booking
      */
-    public abstract List<Booking> getBookingList(String eventKey) throws MalformedURLException, IOException;
+    public abstract List<Booking> getBookingList(String eventKey, String sessionKey) throws IOException;
 
     /**
      * Gets the waiting list of students for an event.
      *
      * @param eventKey The unique identifier for the event in the booking system
      * @return         A list of Student objects on the event waiting list
-     * @throws MalformedURLException
      * @throws IOException
      * @see Student
      */
-    public abstract List<Student> getWaitingList(String eventKey) throws MalformedURLException, IOException;
+    public abstract List<Student> getWaitingList(String eventKey) throws IOException;
     
     /**
      * Gets all unspecified bookings for an event.
      *
      * @param eventKey The unique identifier for the event in the booking system
      * @return         A list of String objects corresponding to unspecified student numbers
-     * @throws MalformedURLException
      * @throws IOException
      */
-    public abstract List<String> getUnspecified(String eventKey) throws MalformedURLException, IOException;
+    public abstract List<String> getUnspecified(String eventKey) throws IOException;
     
     /**
      * Gets the number of attendees for an event.
      *
      * @param eventKey The unique identifier for the event in the booking system
      * @return         The number of recorded attendees
-     * @throws MalformedURLException
      * @throws IOException
      */
-    public abstract int getAttendeeCount(String eventKey) throws MalformedURLException, IOException;
+    public abstract int getAttendeeCount(String eventKey) throws IOException;
+    
+    /**
+     * Gets the booking status for a student and an event.
+     * 
+     * @param studentKey The unique identifier for the attendee in the booking system
+     * @param eventKey   The unique identifier for the event in the booking system
+     * @return           A Booking if the user is booked, null if not
+     * @throws IOException 
+     * @see Booking
+     */
+    public abstract Booking getBooking(String studentKey, String eventKey) throws IOException;
     
     /**
      * Records an attendee with a particular booking status for an event.
      *
-     * @param status     The status to record
+     * @param status     The STATUS enum value to record
      * @param studentKey The unique identifier for the attendee in the booking system
      * @param eventKey   The unique identifier for the event in the booking system
-     * @throws MalformedURLException
      * @throws IOException
      * @see STATUS
      */
-    public abstract void markStatus(STATUS status, String studentKey, String eventKey) throws MalformedURLException, IOException;
+    public abstract void markStatus(STATUS status, String studentKey, String eventKey) throws IOException;
 
     /**
      * Records a group of attendees with a particular booking status for an event.
      *
-     * @param status      The status to record
+     * @param status      The STATUS enum value to record
      * @param studentKeys A List of unique identifiers for the attendees in the booking system
      * @param eventKey    The unique identifier for the event in the booking system
-     * @throws MalformedURLException
      * @throws IOException
      * @see STATUS
      */
-    public abstract void markStatus(STATUS status, List<String> studentKeys, String eventKey) throws MalformedURLException, IOException;
+    public abstract void markStatus(STATUS status, List<String> studentKeys, String eventKey) throws IOException;
 
     /**
      * Records a group of attendees as 'absent' in the booking system and
@@ -111,10 +114,9 @@ public abstract class BookingSystemAPI {
      * @param studentKeys A List of unique identifiers for the attendees in the booking system
      * @param eventKey    The unique identifier for the event in the booking system
      * @param notify      Whether or not to notify the attendees that they have been marked absent
-     * @throws MalformedURLException
      * @throws IOException
      */
-    public abstract void markAbsent(List<String> studentKeys, String eventKey, Boolean notify) throws MalformedURLException, IOException;
+    public abstract void markAbsent(List<String> studentKeys, String eventKey, Boolean notify) throws IOException;
 
     /**
      * Marks all unspecified bookings as 'absent' in the booking system and
@@ -122,74 +124,82 @@ public abstract class BookingSystemAPI {
      *
      * @param eventKey The unique identifier for the event in the booking system
      * @param notify   Whether or not to notify the attendees that they have been marked absent
-     * @throws MalformedURLException
      * @throws IOException
      */
-    public abstract void markAllUnspecifiedAbsent(String eventKey, Boolean notify) throws MalformedURLException, IOException;
+    public abstract void markAllUnspecifiedAbsent(String eventKey, Boolean notify) throws IOException;
 
     /**
      * Cancels a booking.
      *
      * @param studentKey The unique identifier for the attendee in the booking system
      * @param eventKey   The unique identifier for the event in the booking system
-     * @throws MalformedURLException
      * @throws IOException
      */
-    public abstract void cancelBooking(String studentKey, String eventKey) throws MalformedURLException, IOException;
+    public abstract void cancelBooking(String studentKey, String eventKey) throws IOException;
     
     /**
      * Adds a booking to an event.
      *
      * @param studentKey The unique identifier for the attendee in the booking system
      * @param eventKey   The unique identifier for the event in the booking system
+     * @param sessionKey The unique identifier for the timeslot session in the booking system
      * @return           The new Booking object added to the event.
-     * @throws MalformedURLException
      * @throws IOException
      * @see Booking
      */
-    public abstract Booking bookStudent(String studentKey, String eventKey) throws MalformedURLException, IOException;
+    public abstract Booking bookStudent(String studentKey, String eventKey, String sessionKey) throws IOException;
+    
+    /**
+     * Adds a booking to an event.
+     *
+     * @param stuNumber  The unique identifier for the attendee in the booking system
+     * @param eventKey   The unique identifier for the event in the booking system
+     * @param sessionKey The unique identifier for the timeslot session in the booking system
+     * @return           The new Booking object added to the event.
+     * @throws IOException
+     * @see Booking
+     */
+    public abstract Booking bookStudentWithStuNumber(String stuNumber, String eventKey, String sessionKey) throws IOException;
     
     /**
      * Returns the Student corresponding to the student number in the booking system.
      *
      * @param stuNumber The student number in the booking system (note: this is not the same as the unique identifier)
      * @return          The corresponding Student object
-     * @throws MalformedURLException
      * @throws IOException
      * @see Student
      */
-    public abstract Student getStudent(String stuNumber) throws MalformedURLException, IOException;
+    public abstract Student getStudent(String stuNumber) throws IOException;
     
     /**
      * Returns a List of students matching a search term.
      *
      * @param search The term to search (a name or a student number)
      * @return       A List of matching Student objects
-     * @throws MalformedURLException
      * @throws IOException
      * @see Student
      */
-    public abstract List<Student> getStudents(String search) throws MalformedURLException, IOException ;
+    public abstract List<Student> getStudents(String search) throws IOException ;
 
     /**
      * Returns a List of events taking place in the next day.
      *
      * @return           A List of Event objects
-     * @throws MalformedURLException
      * @throws IOException
      * @see Event
      */
-    public abstract List<Event> getEventsList() throws MalformedURLException, IOException;
+    public abstract List<Event> getEventsList() throws IOException;
     
     /**
      * Returns the Event corresponding to the identifier in the booking system.
      *
-     * @param eventKey The unique identifier for the event in the booking system
-     * @return         The corresponding Event object
+     * @param eventKey    The unique identifier for the event in the booking system
+     * @param getBookings A flag indicating whether to also pull in the booking list(s)
+     * @return            The corresponding Event object
      * @throws IOException
      * @see Event
      */
-    public abstract Event getEvent(String eventKey) throws IOException;
+    public abstract Event getEvent(String eventKey, boolean getBookings) throws IOException;
     
     /**
      * Returns the booking system admin URL for the event corresponding to the identifier
@@ -223,6 +233,24 @@ public abstract class BookingSystemAPI {
      * @return the number corresponding with the event being full in the booking system
      */
     public abstract int getEVENT_FULL_STATUS();
+    
+    /**
+     *
+     * @return the number corresponding with a booking status of 'absent' in the booking system
+     */
+    public abstract int getABSENT_STATUS();
+
+    /**
+     *
+     * @return the number corresponding with a booking status of 'unspecified' in the booking system
+     */
+    public abstract int getUNSPECIFIED_STATUS();
+    
+        /**
+     *
+     * @return the number corresponding with a booking status of 'not booked' in the booking system
+     */
+    public abstract int getNOT_BOOKED_STATUS();
 
     /**
      * Returns true/false to indicate whether a student number is a valid format or not.
@@ -231,10 +259,18 @@ public abstract class BookingSystemAPI {
      * @return       True/false depending on whether the student number is valid
      */
     public abstract boolean isValidStuNum(String stuNum);
+    
+    /**
+     * Returns the api event date format
+     * 
+     * @return a String date format
+     */
+    public abstract String getDateFormat();
 
    /**
      *
      * Called when a valid properties file exists. Initialises all booking system variables from property values.
+     * @throws java.io.IOException
      */
     public abstract void init() throws IOException;
 
@@ -244,7 +280,7 @@ public abstract class BookingSystemAPI {
     public enum STATUS {
 
         /**
-         * Status indicating that the booker's attendance is unknown.
+         * Status indicating that the student is booked but their attendance is unknown.
          */
         UNSPECIFIED,
 

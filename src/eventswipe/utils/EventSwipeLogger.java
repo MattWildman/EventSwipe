@@ -2,6 +2,7 @@ package eventswipe.utils;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  *
@@ -11,6 +12,7 @@ public class EventSwipeLogger {
     
    /**
      * Singleton constructor for EventSwipeLogger
+     * @return the instance of EventSwipeLogger
     */
     public static EventSwipeLogger getInstance() {
         if (instance == null) {
@@ -32,20 +34,20 @@ public class EventSwipeLogger {
         }
         try {
             logFile = new File(LOG_DIR, sessionTitle);
-            FileWriter fw = new FileWriter(logFile.getAbsoluteFile(), true);
-            fw.write(sessionTitle + NL);
-            fw.close();
-        } catch (Exception e) {
+            try (FileWriter fw = new FileWriter(logFile.getAbsoluteFile(), true)) {
+                fw.write(sessionTitle + NL);
+            }
+        } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
         }
     }
 
     public void log(String message) {
         try {
-            FileWriter fw = new FileWriter(logFile.getAbsoluteFile(), true);
-            fw.write(Utils.getDate("HH:mm:ss dd/MM/yyyy ") + message + NL);
-            fw.close();
-        } catch (Exception e) {
+            try (FileWriter fw = new FileWriter(logFile.getAbsoluteFile(), true)) {
+                fw.write(Utils.getDate("HH:mm:ss dd/MM/yyyy ") + message + NL);
+            }
+        } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
         }
     }
@@ -67,7 +69,7 @@ public class EventSwipeLogger {
 
     private String sessionTitle = "";
 
-    private File logDir = new File(LOG_DIR);
+    private final File logDir = new File(LOG_DIR);
     private File logFile;
 
     private static EventSwipeLogger instance = null;

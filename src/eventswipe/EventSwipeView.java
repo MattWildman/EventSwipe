@@ -6,6 +6,7 @@ import eventswipe.models.*;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,6 +21,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,7 +74,7 @@ public class EventSwipeView extends FrameView {
         try {
             Image i = ImageIO.read(getClass().getResource("/eventswipe/resources/yourLogoLarge.jpeg"));
             this.getFrame().setIconImage(i);
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println(e.getMessage());
         }
         this.getFrame().setPreferredSize(new Dimension(750, 500));
@@ -81,31 +83,36 @@ public class EventSwipeView extends FrameView {
         buildCounterMap();
         updateBookingPanel(true);
         updateOnlineBookingPanel(true);
-        panelStack = new Stack<JPanel>();
+        panelStack = new Stack<>();
         panelStack.push((JPanel) this.getComponent());
     }
 
     javax.swing.Action save = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             app.saveAttendeesToFile();
         }
     };
     javax.swing.Action toggleBooking = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             checkingModeToggle1.doClick();
         }
     };
     javax.swing.Action checkBooking = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             searchButton.doClick();
         }
     };
     javax.swing.Action toggleConnection = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             onlineModeToggle.doClick();
         }
     };
     javax.swing.Action refreshAttendees = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             refreshAttendeesButton.doClick();
         }
@@ -153,7 +160,7 @@ public class EventSwipeView extends FrameView {
     public void finishAction() {
         try {
             app.finish(markAbsentOption.isSelected(), notifyAbsentOption.isSelected());
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
             app.getLogger().logException(ex);
             JOptionPane.showMessageDialog(
@@ -165,7 +172,7 @@ public class EventSwipeView extends FrameView {
         }
         try {
             app.finish(false, false);
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             Logger.getLogger(EventSwipeApp.class.getName()).log(Level.SEVERE, null, ex);
             app.getLogger().logException(ex);
             System.exit(0);
@@ -188,7 +195,7 @@ public class EventSwipeView extends FrameView {
     
     @Action
     public void saveSettings() {
-        boolean complete = true;
+        boolean complete;
         JTextField[] required = {
             hostInput, apiIdInput, apiSecretInput, regexInput
         };
@@ -223,7 +230,7 @@ public class EventSwipeView extends FrameView {
             markDefaultField(hostInput);
         }
         if (complete) {
-            Map<String,String> props = new HashMap<String,String>();
+            Map<String,String> props = new HashMap<>();
             props.put(EventSwipeData.STATUS_KEY, "custom");
             props.put(EventSwipeData.API_ID_KEY, apiIdInput.getText());
             props.put(EventSwipeData.API_SECRET_KEY, apiSecretInput.getText());
@@ -264,8 +271,8 @@ public class EventSwipeView extends FrameView {
             hostInput, apiIdInput, apiSecretInput, regexInput,
             defaultUsernameInput, defaultPasswordInput
         };
-        for (int i = 0; i < fields.length; i++) {
-            this.markDefaultField(fields[i]);
+        for (JTextField field : fields) {
+            this.markDefaultField(field);
         }
         app.clearProperties();
         hostInput.requestFocusInWindow();
@@ -389,48 +396,14 @@ public class EventSwipeView extends FrameView {
         useOfflineDescription1 = new javax.swing.JTextArea();
         onlineConfigPanel = new javax.swing.JPanel();
         bookingDetailsPanel1 = new javax.swing.JPanel();
-        entrySlotsLabel1 = new javax.swing.JLabel();
-        entrySlotsSpinnerOnline = new javax.swing.JSpinner(new javax.swing.SpinnerNumberModel(1, 1, EventSwipeData.MAX_ENTRY_SLOTS, 1));
         slot1DetailsPanel = new javax.swing.JPanel();
-        generatedTitleLabel1 = new javax.swing.JLabel();
         searchEventsButton1 = new javax.swing.JButton();
         entrySlotIdLabel1 = new javax.swing.JLabel();
         generatedTitle1 = new javax.swing.JTextField();
         loadEventButton1 = new javax.swing.JButton();
         entrySlotIdInput1 = new javax.swing.JFormattedTextField();
         slot1Label = new javax.swing.JLabel();
-        slot2DetailsPanel = new javax.swing.JPanel();
-        generatedTitle2 = new javax.swing.JTextField();
-        entrySlotIdLabel2 = new javax.swing.JLabel();
-        slot2Label = new javax.swing.JLabel();
-        entrySlotIdInput2 = new javax.swing.JFormattedTextField();
-        loadEventButton2 = new javax.swing.JButton();
-        searchEventsButton2 = new javax.swing.JButton();
-        generatedTitleLabel2 = new javax.swing.JLabel();
-        slot3DtailsPanel = new javax.swing.JPanel();
-        generatedTitleLabel3 = new javax.swing.JLabel();
-        searchEventsButton3 = new javax.swing.JButton();
-        generatedTitle3 = new javax.swing.JTextField();
-        slot3Label = new javax.swing.JLabel();
-        entrySlotIdLabel3 = new javax.swing.JLabel();
-        loadEventButton3 = new javax.swing.JButton();
-        entrySlotIdInput3 = new javax.swing.JFormattedTextField();
-        slot4DetailsPanel = new javax.swing.JPanel();
-        searchEventsButton4 = new javax.swing.JButton();
-        slot4Label = new javax.swing.JLabel();
-        loadEventButton4 = new javax.swing.JButton();
-        generatedTitleLabel4 = new javax.swing.JLabel();
-        entrySlotIdInput4 = new javax.swing.JFormattedTextField();
-        generatedTitle4 = new javax.swing.JTextField();
-        entrySlotIdLabel4 = new javax.swing.JLabel();
-        slot5DetailsPanel = new javax.swing.JPanel();
-        entrySlotIdLabel5 = new javax.swing.JLabel();
-        entrySlotIdInput5 = new javax.swing.JFormattedTextField();
-        loadEventButton5 = new javax.swing.JButton();
-        generatedTitle5 = new javax.swing.JTextField();
-        generatedTitleLabel5 = new javax.swing.JLabel();
-        searchEventsButton5 = new javax.swing.JButton();
-        slot5Label = new javax.swing.JLabel();
+        generatedTitleLabel1 = new javax.swing.JLabel();
         waitingListOptionsPanel = new javax.swing.JPanel();
         loadWaitingListLabel = new javax.swing.JLabel();
         noLoadWaitingListRadioButton = new javax.swing.JRadioButton();
@@ -526,11 +499,11 @@ public class EventSwipeView extends FrameView {
 
         menuBar.setName("menuBar"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(eventswipe.EventSwipeApp.class).getContext().getResourceMap(EventSwipeView.class);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(EventSwipeView.class);
         fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
         fileMenu.setName("fileMenu"); // NOI18N
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(eventswipe.EventSwipeApp.class).getContext().getActionMap(EventSwipeView.class, this);
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(EventSwipeView.class, this);
         settingsMenuItem.setAction(actionMap.get("goToSettings")); // NOI18N
         settingsMenuItem.setIcon(resourceMap.getIcon("settingsMenuItem.icon")); // NOI18N
         settingsMenuItem.setText(resourceMap.getString("settingsMenuItem.text")); // NOI18N
@@ -591,7 +564,7 @@ public class EventSwipeView extends FrameView {
             }
         });
 
-        titleLabel.setFont(resourceMap.getFont("titleLabel.font")); // NOI18N
+        titleLabel.setFont(resourceMap.getFont("aboutEventLabel.font")); // NOI18N
         titleLabel.setText(resourceMap.getString("titleLabel.text")); // NOI18N
         titleLabel.setName("titleLabel"); // NOI18N
 
@@ -1153,7 +1126,7 @@ public class EventSwipeView extends FrameView {
         configPanelLayout.setVerticalGroup(
             configPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(configPanelLayout.createSequentialGroup()
-                .addContainerGap(115, Short.MAX_VALUE)
+                .addContainerGap(113, Short.MAX_VALUE)
                 .addComponent(titleLabel)
                 .addGap(1, 1, 1)
                 .addComponent(eventTitlePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1473,20 +1446,7 @@ public class EventSwipeView extends FrameView {
         bookingDetailsPanel1.setEnabled(false);
         bookingDetailsPanel1.setName("bookingDetailsPanel1"); // NOI18N
 
-        entrySlotsLabel1.setText(resourceMap.getString("entrySlotsLabel1.text")); // NOI18N
-        entrySlotsLabel1.setName("entrySlotsLabel1"); // NOI18N
-
-        entrySlotsSpinnerOnline.setName("entrySlotsSpinnerOnline"); // NOI18N
-        entrySlotsSpinnerOnline.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                entrySlotsSpinnerOnlineStateChanged(evt);
-            }
-        });
-
         slot1DetailsPanel.setName("slot1DetailsPanel"); // NOI18N
-
-        generatedTitleLabel1.setText(resourceMap.getString("generatedTitleLabel1.text")); // NOI18N
-        generatedTitleLabel1.setName("generatedTitleLabel1"); // NOI18N
 
         searchEventsButton1.setText(resourceMap.getString("searchEventsButton1.text")); // NOI18N
         searchEventsButton1.setName("searchEventsButton1"); // NOI18N
@@ -1531,419 +1491,8 @@ public class EventSwipeView extends FrameView {
         slot1Label.setText(resourceMap.getString("slot1Label.text")); // NOI18N
         slot1Label.setName("slot1Label"); // NOI18N
 
-        javax.swing.GroupLayout slot1DetailsPanelLayout = new javax.swing.GroupLayout(slot1DetailsPanel);
-        slot1DetailsPanel.setLayout(slot1DetailsPanelLayout);
-        slot1DetailsPanelLayout.setHorizontalGroup(
-            slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(slot1DetailsPanelLayout.createSequentialGroup()
-                .addGroup(slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(slot1DetailsPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(generatedTitleLabel1)
-                            .addComponent(entrySlotIdLabel1))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(slot1DetailsPanelLayout.createSequentialGroup()
-                                .addComponent(entrySlotIdInput1, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(loadEventButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(searchEventsButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(generatedTitle1, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(slot1Label))
-                .addContainerGap())
-        );
-        slot1DetailsPanelLayout.setVerticalGroup(
-            slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(slot1DetailsPanelLayout.createSequentialGroup()
-                .addComponent(slot1Label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(entrySlotIdInput1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(searchEventsButton1)
-                    .addComponent(entrySlotIdLabel1)
-                    .addComponent(loadEventButton1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(generatedTitle1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(generatedTitleLabel1))
-                .addContainerGap())
-        );
-
-        slot2DetailsPanel.setName("slot2DetailsPanel"); // NOI18N
-
-        generatedTitle2.setText(resourceMap.getString("generatedTitle2.text")); // NOI18N
-        generatedTitle2.setEnabled(false);
-        generatedTitle2.setName("generatedTitle2"); // NOI18N
-
-        entrySlotIdLabel2.setText(resourceMap.getString("entrySlotIdLabel2.text")); // NOI18N
-        entrySlotIdLabel2.setName("entrySlotIdLabel2"); // NOI18N
-
-        slot2Label.setFont(resourceMap.getFont("slot2Label.font")); // NOI18N
-        slot2Label.setText(resourceMap.getString("slot2Label.text")); // NOI18N
-        slot2Label.setEnabled(false);
-        slot2Label.setFocusable(false);
-        slot2Label.setName("slot2Label"); // NOI18N
-
-        entrySlotIdInput2.setText(idInputDefault);
-        entrySlotIdInput2.setEnabled(false);
-        entrySlotIdInput2.setName("entrySlotIdInput2"); // NOI18N
-        entrySlotIdInput2.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                inputFocusGained(evt);
-            }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                inputFocusLost(evt);
-            }
-        });
-        entrySlotIdInput2.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                idInputKeyPressed(evt);
-            }
-        });
-
-        loadEventButton2.setText(resourceMap.getString("loadEventButton2.text")); // NOI18N
-        loadEventButton2.setEnabled(false);
-        loadEventButton2.setName("loadEventButton2"); // NOI18N
-        loadEventButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loadEventButtonActionPerformed(evt);
-            }
-        });
-
-        searchEventsButton2.setText(resourceMap.getString("searchEventsButton2.text")); // NOI18N
-        searchEventsButton2.setEnabled(false);
-        searchEventsButton2.setName("searchEventsButton2"); // NOI18N
-        searchEventsButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                searchEventsButtonActionPerformed(evt);
-            }
-        });
-
-        generatedTitleLabel2.setText(resourceMap.getString("generatedTitleLabel2.text")); // NOI18N
-        generatedTitleLabel2.setName("generatedTitleLabel2"); // NOI18N
-
-        javax.swing.GroupLayout slot2DetailsPanelLayout = new javax.swing.GroupLayout(slot2DetailsPanel);
-        slot2DetailsPanel.setLayout(slot2DetailsPanelLayout);
-        slot2DetailsPanelLayout.setHorizontalGroup(
-            slot2DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(slot2DetailsPanelLayout.createSequentialGroup()
-                .addGroup(slot2DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(slot2DetailsPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(slot2DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(generatedTitleLabel2)
-                            .addComponent(entrySlotIdLabel2))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(slot2DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(slot2DetailsPanelLayout.createSequentialGroup()
-                                .addComponent(entrySlotIdInput2, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(loadEventButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(searchEventsButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(generatedTitle2, javax.swing.GroupLayout.PREFERRED_SIZE, 285, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(slot2Label))
-                .addContainerGap(26, Short.MAX_VALUE))
-        );
-        slot2DetailsPanelLayout.setVerticalGroup(
-            slot2DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(slot2DetailsPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(slot2Label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(slot2DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(entrySlotIdInput2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(loadEventButton2)
-                    .addComponent(searchEventsButton2)
-                    .addComponent(entrySlotIdLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(slot2DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(generatedTitle2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(generatedTitleLabel2))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        slot3DtailsPanel.setName("slot3DtailsPanel"); // NOI18N
-
-        generatedTitleLabel3.setText(resourceMap.getString("generatedTitleLabel3.text")); // NOI18N
-        generatedTitleLabel3.setName("generatedTitleLabel3"); // NOI18N
-
-        searchEventsButton3.setText(resourceMap.getString("searchEventsButton3.text")); // NOI18N
-        searchEventsButton3.setEnabled(false);
-        searchEventsButton3.setName("searchEventsButton3"); // NOI18N
-        searchEventsButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                searchEventsButtonActionPerformed(evt);
-            }
-        });
-
-        generatedTitle3.setText(resourceMap.getString("generatedTitle3.text")); // NOI18N
-        generatedTitle3.setEnabled(false);
-        generatedTitle3.setName("generatedTitle3"); // NOI18N
-
-        slot3Label.setFont(resourceMap.getFont("slot3Label.font")); // NOI18N
-        slot3Label.setText(resourceMap.getString("slot3Label.text")); // NOI18N
-        slot3Label.setEnabled(false);
-        slot3Label.setFocusable(false);
-        slot3Label.setName("slot3Label"); // NOI18N
-
-        entrySlotIdLabel3.setText(resourceMap.getString("entrySlotIdLabel3.text")); // NOI18N
-        entrySlotIdLabel3.setName("entrySlotIdLabel3"); // NOI18N
-
-        loadEventButton3.setText(resourceMap.getString("loadEventButton3.text")); // NOI18N
-        loadEventButton3.setEnabled(false);
-        loadEventButton3.setName("loadEventButton3"); // NOI18N
-        loadEventButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loadEventButtonActionPerformed(evt);
-            }
-        });
-
-        entrySlotIdInput3.setText(idInputDefault);
-        entrySlotIdInput3.setEnabled(false);
-        entrySlotIdInput3.setName("entrySlotIdInput3"); // NOI18N
-        entrySlotIdInput3.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                inputFocusGained(evt);
-            }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                inputFocusLost(evt);
-            }
-        });
-        entrySlotIdInput3.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                idInputKeyPressed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout slot3DtailsPanelLayout = new javax.swing.GroupLayout(slot3DtailsPanel);
-        slot3DtailsPanel.setLayout(slot3DtailsPanelLayout);
-        slot3DtailsPanelLayout.setHorizontalGroup(
-            slot3DtailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(slot3DtailsPanelLayout.createSequentialGroup()
-                .addGroup(slot3DtailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(slot3DtailsPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(slot3DtailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(entrySlotIdLabel3)
-                            .addComponent(generatedTitleLabel3))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(slot3DtailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(slot3DtailsPanelLayout.createSequentialGroup()
-                                .addComponent(entrySlotIdInput3, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(loadEventButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(searchEventsButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(generatedTitle3, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)))
-                    .addComponent(slot3Label))
-                .addContainerGap())
-        );
-        slot3DtailsPanelLayout.setVerticalGroup(
-            slot3DtailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(slot3DtailsPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(slot3Label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(slot3DtailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(entrySlotIdInput3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(entrySlotIdLabel3)
-                    .addComponent(searchEventsButton3)
-                    .addComponent(loadEventButton3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(slot3DtailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(generatedTitle3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(generatedTitleLabel3))
-                .addContainerGap())
-        );
-
-        slot4DetailsPanel.setName("slot4DetailsPanel"); // NOI18N
-
-        searchEventsButton4.setText(resourceMap.getString("searchEventsButton4.text")); // NOI18N
-        searchEventsButton4.setEnabled(false);
-        searchEventsButton4.setName("searchEventsButton4"); // NOI18N
-        searchEventsButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                searchEventsButtonActionPerformed(evt);
-            }
-        });
-
-        slot4Label.setFont(resourceMap.getFont("slot4Label.font")); // NOI18N
-        slot4Label.setText(resourceMap.getString("slot4Label.text")); // NOI18N
-        slot4Label.setEnabled(false);
-        slot4Label.setFocusable(false);
-        slot4Label.setName("slot4Label"); // NOI18N
-
-        loadEventButton4.setText(resourceMap.getString("loadEventButton4.text")); // NOI18N
-        loadEventButton4.setEnabled(false);
-        loadEventButton4.setName("loadEventButton4"); // NOI18N
-        loadEventButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loadEventButtonActionPerformed(evt);
-            }
-        });
-
-        generatedTitleLabel4.setText(resourceMap.getString("generatedTitleLabel4.text")); // NOI18N
-        generatedTitleLabel4.setName("generatedTitleLabel4"); // NOI18N
-
-        entrySlotIdInput4.setText(idInputDefault);
-        entrySlotIdInput4.setEnabled(false);
-        entrySlotIdInput4.setName("entrySlotIdInput4"); // NOI18N
-        entrySlotIdInput4.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                inputFocusGained(evt);
-            }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                inputFocusLost(evt);
-            }
-        });
-        entrySlotIdInput4.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                idInputKeyPressed(evt);
-            }
-        });
-
-        generatedTitle4.setEnabled(false);
-        generatedTitle4.setName("generatedTitle4"); // NOI18N
-
-        entrySlotIdLabel4.setText(resourceMap.getString("entrySlotIdLabel4.text")); // NOI18N
-        entrySlotIdLabel4.setName("entrySlotIdLabel4"); // NOI18N
-
-        javax.swing.GroupLayout slot4DetailsPanelLayout = new javax.swing.GroupLayout(slot4DetailsPanel);
-        slot4DetailsPanel.setLayout(slot4DetailsPanelLayout);
-        slot4DetailsPanelLayout.setHorizontalGroup(
-            slot4DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(slot4DetailsPanelLayout.createSequentialGroup()
-                .addGroup(slot4DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(slot4DetailsPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(slot4DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(generatedTitleLabel4)
-                            .addComponent(entrySlotIdLabel4))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(slot4DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(slot4DetailsPanelLayout.createSequentialGroup()
-                                .addComponent(entrySlotIdInput4, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(loadEventButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(searchEventsButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(generatedTitle4, javax.swing.GroupLayout.PREFERRED_SIZE, 282, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(slot4Label))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        slot4DetailsPanelLayout.setVerticalGroup(
-            slot4DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(slot4DetailsPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(slot4Label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(slot4DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(entrySlotIdInput4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(loadEventButton4)
-                    .addComponent(searchEventsButton4)
-                    .addComponent(entrySlotIdLabel4))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(slot4DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(generatedTitle4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(generatedTitleLabel4))
-                .addContainerGap())
-        );
-
-        slot5DetailsPanel.setName("slot5DetailsPanel"); // NOI18N
-
-        entrySlotIdLabel5.setText(resourceMap.getString("entrySlotIdLabel5.text")); // NOI18N
-        entrySlotIdLabel5.setName("entrySlotIdLabel5"); // NOI18N
-
-        entrySlotIdInput5.setText(idInputDefault);
-        entrySlotIdInput5.setEnabled(false);
-        entrySlotIdInput5.setName("entrySlotIdInput5"); // NOI18N
-        entrySlotIdInput5.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                inputFocusGained(evt);
-            }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                inputFocusLost(evt);
-            }
-        });
-        entrySlotIdInput5.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                idInputKeyPressed(evt);
-            }
-        });
-
-        loadEventButton5.setText(resourceMap.getString("loadEventButton5.text")); // NOI18N
-        loadEventButton5.setEnabled(false);
-        loadEventButton5.setName("loadEventButton5"); // NOI18N
-        loadEventButton5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loadEventButtonActionPerformed(evt);
-            }
-        });
-
-        generatedTitle5.setEnabled(false);
-        generatedTitle5.setName("generatedTitle5"); // NOI18N
-
-        generatedTitleLabel5.setText(resourceMap.getString("generatedTitleLabel5.text")); // NOI18N
-        generatedTitleLabel5.setName("generatedTitleLabel5"); // NOI18N
-
-        searchEventsButton5.setText(resourceMap.getString("searchEventsButton5.text")); // NOI18N
-        searchEventsButton5.setEnabled(false);
-        searchEventsButton5.setName("searchEventsButton5"); // NOI18N
-        searchEventsButton5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                searchEventsButtonActionPerformed(evt);
-            }
-        });
-
-        slot5Label.setFont(resourceMap.getFont("slot5Label.font")); // NOI18N
-        slot5Label.setText(resourceMap.getString("slot5Label.text")); // NOI18N
-        slot5Label.setEnabled(false);
-        slot5Label.setFocusable(false);
-        slot5Label.setName("slot5Label"); // NOI18N
-
-        javax.swing.GroupLayout slot5DetailsPanelLayout = new javax.swing.GroupLayout(slot5DetailsPanel);
-        slot5DetailsPanel.setLayout(slot5DetailsPanelLayout);
-        slot5DetailsPanelLayout.setHorizontalGroup(
-            slot5DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(slot5DetailsPanelLayout.createSequentialGroup()
-                .addGroup(slot5DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(slot5DetailsPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(slot5DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(entrySlotIdLabel5)
-                            .addComponent(generatedTitleLabel5))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(slot5DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(slot5DetailsPanelLayout.createSequentialGroup()
-                                .addComponent(entrySlotIdInput5, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(loadEventButton5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(searchEventsButton5))
-                            .addComponent(generatedTitle5, javax.swing.GroupLayout.DEFAULT_SIZE, 283, Short.MAX_VALUE)))
-                    .addComponent(slot5Label))
-                .addContainerGap())
-        );
-        slot5DetailsPanelLayout.setVerticalGroup(
-            slot5DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(slot5DetailsPanelLayout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addComponent(slot5Label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(slot5DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(entrySlotIdInput5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(entrySlotIdLabel5)
-                    .addComponent(searchEventsButton5)
-                    .addComponent(loadEventButton5))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(slot5DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(generatedTitle5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(generatedTitleLabel5))
-                .addContainerGap())
-        );
+        generatedTitleLabel1.setText(resourceMap.getString("generatedTitleLabel1.text")); // NOI18N
+        generatedTitleLabel1.setName("generatedTitleLabel1"); // NOI18N
 
         waitingListOptionsPanel.setName("waitingListOptionsPanel"); // NOI18N
 
@@ -1964,23 +1513,62 @@ public class EventSwipeView extends FrameView {
         waitingListOptionsPanelLayout.setHorizontalGroup(
             waitingListOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(waitingListOptionsPanelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(loadWaitingListLabel)
-                .addGap(4, 4, 4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(yesLoadWaitingListRadioButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(noLoadWaitingListRadioButton)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         waitingListOptionsPanelLayout.setVerticalGroup(
             waitingListOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(waitingListOptionsPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(waitingListOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(loadWaitingListLabel)
-                    .addComponent(yesLoadWaitingListRadioButton)
-                    .addComponent(noLoadWaitingListRadioButton))
+            .addComponent(loadWaitingListLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE)
+            .addComponent(yesLoadWaitingListRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(noLoadWaitingListRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout slot1DetailsPanelLayout = new javax.swing.GroupLayout(slot1DetailsPanel);
+        slot1DetailsPanel.setLayout(slot1DetailsPanelLayout);
+        slot1DetailsPanelLayout.setHorizontalGroup(
+            slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(slot1DetailsPanelLayout.createSequentialGroup()
+                .addGroup(slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(slot1DetailsPanelLayout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addComponent(entrySlotIdLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(entrySlotIdInput1, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(loadEventButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 309, Short.MAX_VALUE)
+                        .addComponent(searchEventsButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(slot1Label)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, slot1DetailsPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(generatedTitleLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(generatedTitle1, javax.swing.GroupLayout.DEFAULT_SIZE, 639, Short.MAX_VALUE))
+                    .addGroup(slot1DetailsPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(waitingListOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
+        );
+        slot1DetailsPanelLayout.setVerticalGroup(
+            slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(slot1DetailsPanelLayout.createSequentialGroup()
+                .addComponent(slot1Label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(entrySlotIdInput1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(searchEventsButton1)
+                    .addComponent(entrySlotIdLabel1)
+                    .addComponent(loadEventButton1))
+                .addGap(15, 15, 15)
+                .addGroup(slot1DetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(generatedTitleLabel1)
+                    .addComponent(generatedTitle1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
+                .addComponent(waitingListOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         javax.swing.GroupLayout bookingDetailsPanel1Layout = new javax.swing.GroupLayout(bookingDetailsPanel1);
@@ -1988,49 +1576,15 @@ public class EventSwipeView extends FrameView {
         bookingDetailsPanel1Layout.setHorizontalGroup(
             bookingDetailsPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(bookingDetailsPanel1Layout.createSequentialGroup()
-                .addGroup(bookingDetailsPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(bookingDetailsPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(slot2DetailsPanel, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(bookingDetailsPanel1Layout.createSequentialGroup()
-                        .addGap(14, 14, 14)
-                        .addComponent(entrySlotsLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(entrySlotsSpinnerOnline, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(bookingDetailsPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(slot4DetailsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(bookingDetailsPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(slot1DetailsPanel, 0, 328, Short.MAX_VALUE)
-                    .addComponent(slot5DetailsPanel, 0, 328, Short.MAX_VALUE)
-                    .addComponent(slot3DtailsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 328, Short.MAX_VALUE))
-                .addGap(7, 7, 7))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, bookingDetailsPanel1Layout.createSequentialGroup()
-                .addGap(505, 505, 505)
-                .addComponent(waitingListOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 191, Short.MAX_VALUE)
+                .addComponent(slot1DetailsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         bookingDetailsPanel1Layout.setVerticalGroup(
             bookingDetailsPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(bookingDetailsPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(bookingDetailsPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(bookingDetailsPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(entrySlotsSpinnerOnline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(entrySlotsLabel1))
-                    .addComponent(slot1DetailsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(bookingDetailsPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(slot3DtailsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(slot2DetailsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(bookingDetailsPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(slot4DetailsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(slot5DetailsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(waitingListOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20, 20, 20))
+                .addComponent(slot1DetailsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         onlineConfigBackButton.setAction(actionMap.get("goBack")); // NOI18N
@@ -2056,30 +1610,26 @@ public class EventSwipeView extends FrameView {
             .addGroup(onlineConfigPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(onlineConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bookingDetailsPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(aboutEventLabel)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, onlineConfigPanelLayout.createSequentialGroup()
                         .addComponent(onlineConfigBackButton, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 510, Short.MAX_VALUE)
-                        .addComponent(okConfigButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
-                    .addGroup(onlineConfigPanelLayout.createSequentialGroup()
-                        .addComponent(aboutEventLabel)
-                        .addContainerGap(624, Short.MAX_VALUE))
-                    .addGroup(onlineConfigPanelLayout.createSequentialGroup()
-                        .addComponent(bookingDetailsPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(7, 7, 7))))
+                        .addComponent(okConfigButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         onlineConfigPanelLayout.setVerticalGroup(
             onlineConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, onlineConfigPanelLayout.createSequentialGroup()
+            .addGroup(onlineConfigPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(aboutEventLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(bookingDetailsPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(onlineConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 159, Short.MAX_VALUE)
+                .addGroup(onlineConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(okConfigButton1)
                     .addComponent(onlineConfigBackButton))
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         mainOnlinePanel.setMinimumSize(new java.awt.Dimension(720, 350));
@@ -2227,28 +1777,22 @@ public class EventSwipeView extends FrameView {
                 .addComponent(statusLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusDisplayTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(entrySlotLabel1)
+                .addGap(10, 10, 10)
+                .addComponent(entrySlotLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(entrySlotDisplayTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(bookingStatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(bookingStatusPanelLayout.createSequentialGroup()
-                        .addGap(23, 23, 23)
-                        .addComponent(attendeeCountLabel1))
-                    .addGroup(bookingStatusPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(thisMachineLabel)))
+                .addComponent(entrySlotDisplayTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(bookingStatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(attendeeCountLabel1)
+                    .addComponent(thisMachineLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(localAttendeeCountTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(bookingStatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(bookingStatusPanelLayout.createSequentialGroup()
-                        .addGap(34, 34, 34)
-                        .addComponent(totalLabel))
-                    .addGroup(bookingStatusPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(attendeeCountLabel2)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(totalAttendeeCountDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(bookingStatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(attendeeCountLabel2)
+                    .addComponent(totalLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(totalAttendeeCountDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(refreshAttendeesButton, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -2257,6 +1801,7 @@ public class EventSwipeView extends FrameView {
             .addGroup(bookingStatusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(bookingStatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(entrySlotLabel1)
                     .addComponent(statusLabel1)
                     .addGroup(bookingStatusPanelLayout.createSequentialGroup()
                         .addGap(2, 2, 2)
@@ -2265,16 +1810,13 @@ public class EventSwipeView extends FrameView {
                             .addComponent(entrySlotDisplayTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(localAttendeeCountTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(thisMachineLabel)))
-                    .addComponent(entrySlotLabel1)
-                    .addComponent(attendeeCountLabel1)
-                    .addGroup(bookingStatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(bookingStatusPanelLayout.createSequentialGroup()
-                            .addComponent(attendeeCountLabel2)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(totalLabel))
-                        .addComponent(totalAttendeeCountDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(refreshAttendeesButton, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(6, Short.MAX_VALUE))
+                    .addComponent(attendeeCountLabel2)
+                    .addGroup(bookingStatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(totalAttendeeCountDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(totalLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE))
+                    .addComponent(refreshAttendeesButton, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(attendeeCountLabel1))
+                .addContainerGap())
         );
 
         historyLabel.setText(resourceMap.getString("historyLabel.text")); // NOI18N
@@ -2371,7 +1913,7 @@ public class EventSwipeView extends FrameView {
                 .addGroup(eventStatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(eventStatusUnsavedNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(eventStatusSavedNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 118, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 130, Short.MAX_VALUE)
                 .addGroup(eventStatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(eventStatusNotAttendedLabel)
                     .addComponent(eventStatusNotAttendedLabel1))
@@ -2417,13 +1959,13 @@ public class EventSwipeView extends FrameView {
             .addGroup(mainOnlinePanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(mainOnlinePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(bookingStatusScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 715, Short.MAX_VALUE)
+                    .addComponent(bookingStatusScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 727, Short.MAX_VALUE)
                     .addComponent(eventStatusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 715, Short.MAX_VALUE)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 727, Short.MAX_VALUE)
                     .addGroup(mainOnlinePanelLayout.createSequentialGroup()
                         .addComponent(searchInputLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(searchInput, javax.swing.GroupLayout.DEFAULT_SIZE, 356, Short.MAX_VALUE)
+                        .addComponent(searchInput, javax.swing.GroupLayout.DEFAULT_SIZE, 368, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -2433,7 +1975,7 @@ public class EventSwipeView extends FrameView {
                     .addComponent(bookingStatusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainOnlinePanelLayout.createSequentialGroup()
                         .addComponent(backButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 534, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 546, Short.MAX_VALUE)
                         .addComponent(finishButton, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(historyLabel))
                 .addContainerGap())
@@ -2443,13 +1985,14 @@ public class EventSwipeView extends FrameView {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainOnlinePanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(mainOnlinePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(searchInput, javax.swing.GroupLayout.DEFAULT_SIZE, 53, Short.MAX_VALUE)
                     .addComponent(searchInputLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 53, Short.MAX_VALUE)
-                    .addGroup(mainOnlinePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(mainOnlinePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(searchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE)
-                            .addComponent(checkingModeToggle1, javax.swing.GroupLayout.DEFAULT_SIZE, 52, Short.MAX_VALUE))
-                        .addComponent(onlineModeToggle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(mainOnlinePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(searchInput, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainOnlinePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(mainOnlinePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(searchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE)
+                                .addComponent(checkingModeToggle1, javax.swing.GroupLayout.DEFAULT_SIZE, 52, Short.MAX_VALUE))
+                            .addComponent(onlineModeToggle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(bookingStatusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -2708,7 +2251,6 @@ searchInput.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_T,
     settingsBackButton.setText(resourceMap.getString("settingsBackButton.text")); // NOI18N
     settingsBackButton.setName("settingsBackButton"); // NOI18N
 
-    settingsPanelTitle.setFont(resourceMap.getFont("titleLabel.font")); // NOI18N
     settingsPanelTitle.setText(resourceMap.getString("settingsPanelTitle.text")); // NOI18N
     settingsPanelTitle.setName("settingsPanelTitle"); // NOI18N
 
@@ -2984,10 +2526,6 @@ searchInput.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_T,
         checkOnlineConfiguration();
     }//GEN-LAST:event_okConfigButton1ActionPerformed
 
-    private void entrySlotsSpinnerOnlineStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_entrySlotsSpinnerOnlineStateChanged
-        updateOnlineBookingPanel(true);
-    }//GEN-LAST:event_entrySlotsSpinnerOnlineStateChanged
-
 private void inputFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_inputFocusLost
     inputFocusChanged(evt, false);
 }//GEN-LAST:event_inputFocusLost
@@ -3006,7 +2544,7 @@ private void noWaitingListRadioButtonActionPerformed(java.awt.event.ActionEvent 
 
 private void browseFileAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseFileAction
     JFileChooser fc = new JFileChooser();
-    File file = null;
+    File file;
     fc.addChoosableFileFilter(new TextCSVFilter());
     int returnVal = fc.showDialog(app.getMainFrame(), "Choose");
     if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -3036,10 +2574,9 @@ private void yesBookingRadioButtonActionPerformed(java.awt.event.ActionEvent evt
 
 private void loadEventButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadEventButtonActionPerformed
     JButton source = (JButton) evt.getSource();
-    Slot slotView = this.getSlotView(source, Component.LOAD);
-    JFormattedTextField idInput = (JFormattedTextField) slotView.allComponents.get(Component.ID);
-    JTextField titleInput = (JTextField) slotView.allComponents.get(Component.TITLE);
-    String id = "";
+    JFormattedTextField idInput = entrySlotIdInput1;
+    JTextField titleInput = generatedTitle1;
+    String id;
     id = idInput.getText();
     if (id.isEmpty() || id.equals(idInputDefault)) {
         JOptionPane.showMessageDialog(app.getMainFrame(),
@@ -3068,15 +2605,15 @@ private void loadEventButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
 }//GEN-LAST:event_loadEventButtonActionPerformed
 
 private void searchEventsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchEventsButtonActionPerformed
-    List<Event> events = new ArrayList<Event>();
+    List<Event> events = new ArrayList<>();
     try {
         events = app.getEvents("");
-    } catch (Exception ex) {
+    } catch (IOException ex) {
         Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
         app.getLogger().logException(ex);
         showGenericErrorMessage();
     }
-    List<String> eventTitles = new ArrayList<String>();
+    List<String> eventTitles = new ArrayList<>();
     for (Event event : events){
         eventTitles.add(event.getTitle());
     }
@@ -3089,9 +2626,8 @@ private void searchEventsButtonActionPerformed(java.awt.event.ActionEvent evt) {
     JOptionPane.showMessageDialog(null, eventListScroller, "Select event", JOptionPane.PLAIN_MESSAGE);
     int i = eventList.getSelectedIndex();
     if (i != -1) {
-        Slot slotView = this.getSlotView((JButton) evt.getSource(), Component.SEARCH);
-        JFormattedTextField idInput = (JFormattedTextField) slotView.allComponents.get(Component.ID);
-        JTextField titleInput = (JTextField) slotView.allComponents.get(Component.TITLE);
+        JFormattedTextField idInput = entrySlotIdInput1;
+        JTextField titleInput = generatedTitle1;
         idInput.setText(events.get(i).getId());
         titleInput.setText(events.get(i).getTitle());
     }
@@ -3102,7 +2638,7 @@ private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
     String input = searchInput.getText();
     if (!input.isEmpty()) {
         if (app.isValidId(input)) {
-            Booking booking = new Booking("");
+            Booking booking;
                 try {
                     booking = app.processSearchInput(input);
                     updateBookingStatus(booking);
@@ -3112,7 +2648,7 @@ private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                 } catch (EarlyRegistrationException er) {
                     app.getLogger().logException(er);
                     earlyRegistrationDisplay(input);
-                } catch (Exception ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                     app.getLogger().logException(ex);
                     showGenericErrorMessage();
@@ -3126,11 +2662,11 @@ private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
             searchInput.setText("");
             searchInput.requestFocusInWindow();
             if (app.isOnlineMode()) {
-                List<Student> students = new ArrayList<Student>();
+                List<Student> students = new ArrayList<>();
                 try {
                     input = URLEncoder.encode(input, app.getCharset());
                     students = app.getStudents(input);
-                } catch (Exception ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                     app.getLogger().logException(ex);
                     searchInput.setEnabled(true);
@@ -3143,7 +2679,7 @@ private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                                                   JOptionPane.ERROR_MESSAGE);
                 }
                 else {
-                    List<String> studentNames = new ArrayList<String>();
+                    List<String> studentNames = new ArrayList<>();
                     for (Student student : students){
                         studentNames.add(student.getFirstName() + " " +
                                          student.getLastName());
@@ -3208,8 +2744,7 @@ private void loginInputKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:even
 private void idInputKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_idInputKeyPressed
     KeyEvent ke = (KeyEvent) evt;
     if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
-        JButton loadButton = (JButton) this.getSlotView((JFormattedTextField) evt.getSource(), Component.ID)
-                                           .allComponents.get(Component.LOAD);
+        JButton loadButton = (JButton) this.loadEventButton1;
         loadButton.doClick();
     }
 }//GEN-LAST:event_idInputKeyPressed
@@ -3227,7 +2762,7 @@ private void refreshAttendeesButtonActionPerformed(java.awt.event.ActionEvent ev
     try {
         totalAttendeeCountDisplay.setText(app.getAttendeeCount());
         updateEventStatus();
-    } catch (Exception ex) {
+    } catch (IOException ex) {
         Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
         app.getLogger().logException(ex);
         totalAttendeeCountDisplay.setText(currentCount);
@@ -3289,7 +2824,7 @@ private void studentIdLengthSpinnerStateChanged(javax.swing.event.ChangeEvent ev
 }//GEN-LAST:event_studentIdLengthSpinnerStateChanged
 
 private void regexRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regexRadioActionPerformed
-    String regex = "";
+    String regex;
     JRadioButton source = (JRadioButton) evt.getSource();
     if (source.equals(numbersRadio)) {
         regex = "\\d";
@@ -3349,9 +2884,9 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                 goToSettings();
             }
             else if(reply == JOptionPane.NO_OPTION) {
-                switchToPanel(offlinePanel);
+                switchToPanel(configPanel);
             }
-        } catch (Exception e) {
+        } catch (HeadlessException | IOException e) {
             JOptionPane.showMessageDialog(app.getMainFrame(),
               "There was a problem logging in. " +
               "Please check your internet connection and booking system settings and try again",
@@ -3397,9 +2932,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
         }
         else {
             Event event = new Event();
-            event.setSlot(1);
             event.setTitle(eventTitleInput.getText());
-            event.setBookingList(new ArrayList<Booking>());
             app.addEvent(event);
         }
 
@@ -3416,81 +2949,78 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
 
     private void checkOnlineConfiguration() {
         app.clearData();
-        int slots = (Integer) entrySlotsSpinnerOnline.getValue();
         boolean useWaitingList = yesLoadWaitingListRadioButton.isSelected();
         app.setWaitingListFlag(false);
-        app.setSlots(slots);
         boolean configOK = false;
         String displayTitle = "";
 
-        for (int i = 0; i < slots; i++) {
-            JFormattedTextField idInput = (JFormattedTextField) slotViews[i].allComponents.get(Component.ID);
-            String id = idInput.getText();
-            if (!(id.equals(idInputDefault) || id.equals(""))) {
-                try {
-                    Event slot = app.loadEvent(id, i + 1, useWaitingList);
-                    int bookingCount = slot.getBookingList().size(),
-                        bookingLimit = slot.getBookingLimit();
-                    if (slot.isDropIn()) {
-                        Object[] options = {"Go to event", "Cancel"};
-                        int reply = JOptionPane.showOptionDialog(app.getMainFrame(),
-                              slot.getTitle() + " does not have booking enabled. " +
-                              "You must enable booking (without a booking limit) before continuing.",
-                              "Event booking error",
-                              JOptionPane.YES_NO_OPTION,
-                              JOptionPane.QUESTION_MESSAGE,
-                              null,
-                              options,
-                              options[0]);
-                        if (reply == JOptionPane.YES_OPTION) {
-                            browseToUrl(app.getAdminEventURL(slot.getId()));
-                        }
-                        return;
+        JFormattedTextField idInput = (JFormattedTextField) entrySlotIdInput1;
+        String id = idInput.getText();
+        if (!(id.equals(idInputDefault) || id.equals(""))) {
+            try {
+                Event event = app.loadEvent(id, useWaitingList);
+                int bookingCount = event.getBookingCount(),
+                    bookingLimit = event.getBookingLimit();
+                if (event.isDropIn()) {
+                    Object[] options = {"Go to event", "Cancel"};
+                    int reply = JOptionPane.showOptionDialog(app.getMainFrame(),
+                          event.getTitle() + " does not have booking enabled. " +
+                          "You must enable booking (without a booking limit) before continuing.",
+                          "Event booking error",
+                          JOptionPane.YES_NO_OPTION,
+                          JOptionPane.QUESTION_MESSAGE,
+                          null,
+                          options,
+                          options[0]);
+                    if (reply == JOptionPane.YES_OPTION) {
+                        browseToUrl(app.getAdminEventURL(event.getId()));
                     }
-                    else if(!slot.isUnlimited()) {
-                        int spaces = bookingLimit - bookingCount;
-                        String message = "";
-                        Object[] options = {"Go to event", "Continue"};
-                        if (spaces == 0) {
-                            message = slot.getTitle() + " is fully booked. " +
-                                      System.getProperty("line.separator") +
-                                      "It is strongly recommended you remove the booking limit on CareerHub.";
-                        }
-                        else {
-                            message = "You will only be able to book " +
-                                      spaces + " extra " + 
-                                      (spaces == 1 ? "attendee" : "attendees") +
-                                      " for " + slot.getTitle() + "." +
-                                      System.getProperty("line.separator") +
-                                      "It is recommended you remove the booking limit on CareerHub.";
-                        }
-                        int reply = JOptionPane.showOptionDialog(app.getMainFrame(),
-                              message,
-                              "Booking limit warning",
-                              JOptionPane.YES_NO_OPTION,
-                              JOptionPane.QUESTION_MESSAGE,
-                              null,
-                              options,
-                              options[0]);
-                        if (reply == JOptionPane.YES_OPTION) {
-                            browseToUrl(app.getAdminEventURL(slot.getId()));
-                        }
-                    }
-                    String title = slot.getTitle();
-                    JTextField titlePath = (JTextField) slotViews[i].allComponents.get(Component.TITLE);
-                    titlePath.setText(title);
-                    displayTitle += " - " + title;
-                    configOK = true;
-                } catch (Exception ex) {
-                    configOK = false;
-                    Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
-                    app.getLogger().logException(ex);
+                    return;
                 }
-            }
-            else {
+                else if(!event.isUnlimited()) {
+                    int spaces = bookingLimit - bookingCount;
+                    String message;
+                    Object[] options = {"Go to event", "Continue"};
+                    if (spaces == 0) {
+                        message = event.getTitle() + " is fully booked. " +
+                                  System.getProperty("line.separator") +
+                                  "It is strongly recommended you remove the booking limit on CareerHub.";
+                    }
+                    else {
+                        message = "You will only be able to book " +
+                                  spaces + " extra " + 
+                                  (spaces == 1 ? "attendee" : "attendees") +
+                                  " for " + event.getTitle() + "." +
+                                  System.getProperty("line.separator") +
+                                  "It is recommended you remove the booking limit on CareerHub.";
+                    }
+                    int reply = JOptionPane.showOptionDialog(app.getMainFrame(),
+                          message,
+                          "Booking limit warning",
+                          JOptionPane.YES_NO_OPTION,
+                          JOptionPane.QUESTION_MESSAGE,
+                          null,
+                          options,
+                          options[0]);
+                    if (reply == JOptionPane.YES_OPTION) {
+                        browseToUrl(app.getAdminEventURL(event.getId()));
+                    }
+                }
+                String title = event.getTitle();
+                JTextField titlePath = (JTextField) generatedTitle1;
+                titlePath.setText(title);
+                displayTitle += " - " + title;
+                configOK = true;
+            } catch (Exception ex) {
                 configOK = false;
+                Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
+                app.getLogger().logException(ex);
             }
         }
+        else {
+            configOK = false;
+        }
+            
         if (configOK) {
             app.setEventTitle(displayTitle.substring(3));
             app.createLog();
@@ -3500,7 +3030,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
             String totalAttendees = "0";
             try {
                 totalAttendees = app.getAttendeeCount();
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                 app.getLogger().logException(ex);
             }
@@ -3535,7 +3065,16 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
     private void updateBookingStatus(Booking booking) {
         String stuNumber = booking.getStuNumber();
         String message = "Student " + stuNumber;
-        String slot = app.isSingleSlot() ? "N/A" : booking.getEntrySlot().toString();
+        Event event = app.getEvent();
+        String slot = "N/A";
+        if (null != booking.getSessionId()) {
+            for (Session s: event.getSessions()) {
+                if (s.getId().equals(booking.getSessionId())) {
+                    slot = null != s.getStart() ?
+                           Utils.getTimeString(s.getStart()) : s.getId();
+                }
+            }
+        }
         slot = booking.isOnWaitingList() ? "W/L" : slot;
         String bookingStatus = "";
         if (booking.isAlreadyRecorded()) {
@@ -3543,7 +3082,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
             message += " has already been recorded";
             bookingStatus = "Already recorded";
         }
-        else if (booking.getStatus() == Booking.EARLY_STATUS) {
+        else if (Objects.equals(booking.getStatus(), Booking.EARLY_STATUS)) {
             Utils.failureNoise();
             bookingStatus = "Too early";
             int reply = JOptionPane.showConfirmDialog(app.getMainFrame(),
@@ -3552,7 +3091,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                                                       "Student too early",
                                                       JOptionPane.YES_NO_OPTION);
             if (reply == JOptionPane.YES_OPTION) {
-                app.addToEarlyList(stuNumber, booking.getEntrySlot());
+                app.addToEarlyList(stuNumber);
                 bookingStatus = "Booked";
                 message += " has been recorded";
             }
@@ -3575,7 +3114,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                 } catch (EventFullException ef) {
                     eventFullDisplay(ef.getStuNum());
                     return;
-                } catch (Exception ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                     app.getLogger().logException(ex);
                     showGenericErrorMessage();
@@ -3624,7 +3163,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                 } catch (EventFullException ef) {
                     eventFullDisplay(ef.getStuNum());
                     return;
-                } catch (Exception ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                     app.getLogger().logException(ex);
                     showGenericErrorMessage();
@@ -3653,27 +3192,31 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
         entrySlotDisplayTextField1.setText(slot);
         Color color;
         boolean enabled;
-        if(statusMessage.equals("Booked")) {
-            color = Color.GREEN;
-            enabled = true;
-            localAttendeeCountTextField.setText(app.incrementLocalAttendeeCount());
-            attendeesDisplay++;
-        }
-        else if(statusMessage.equals("Recorded") || statusMessage.equals("")) {
-            color = Color.WHITE;
-            enabled = false;
-            localAttendeeCountTextField.setText(app.incrementLocalAttendeeCount());
-            attendeesDisplay++;
-        }
-        else {
-            enabled = false;
-            color = statusMessage.equals("Not booked") ? Color.RED : Color.ORANGE;
+        switch (statusMessage) {
+            case "Booked":
+                color = Color.GREEN;
+                enabled = true;
+                localAttendeeCountTextField.setText(app.incrementLocalAttendeeCount());
+                attendeesDisplay++;
+                break;
+            case "Recorded":
+            case "":
+                color = Color.WHITE;
+                enabled = false;
+                localAttendeeCountTextField.setText(app.incrementLocalAttendeeCount());
+                attendeesDisplay++;
+                break;
+            default:
+                enabled = false;
+                color = statusMessage.equals("Not booked") ? Color.RED : Color.ORANGE;
+                break;
         }
         statusDisplayTextField1.setBackground(color);
         entrySlotLabel1.setEnabled(enabled && !app.isSingleSlot());
         entrySlotDisplayTextField1.setEnabled(enabled && !app.isSingleSlot());
         int delay = 500; //milliseconds
         ActionListener taskPerformer = new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent evt) {
                 statusDisplayTextField1.setBackground(null);
             }
@@ -3684,7 +3227,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
         if (app.isOnlineMode()){
             try {
                 totalAttendeeCountDisplay.setText(app.getAttendeeCount());
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                 app.getLogger().logException(ex);
                 totalAttendeeCountDisplay.setText(app.getLocalAttendeeCount());
@@ -3713,7 +3256,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                                                  options[0]);
         if (reply == JOptionPane.YES_OPTION) {
             try {
-                browseToUrl(app.getAdminEventURL(app.getEvent(0).getId()));
+                browseToUrl(app.getAdminEventURL(app.getEvent().getId()));
             } catch (IOException ex) {
                 Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, ex);
                 app.getLogger().logException(ex);
@@ -3760,7 +3303,6 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
 
     private void updateBookingPanel(boolean enabled) {
         Integer slots = (Integer)entrySlotsSpinnerOffline.getValue();
-        entrySlotsSpinnerOnline.setValue(slots);
         bookingDetailsPanel.setEnabled(enabled);
 
         for (int i = EventSwipeData.MAX_ENTRY_SLOTS - 1; i >= 0; i--) {
@@ -3787,15 +3329,8 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
     }
 
     private void updateOnlineBookingPanel(boolean enabled) {
-        Integer slots = (Integer)entrySlotsSpinnerOnline.getValue();
-        entrySlotsSpinnerOffline.setValue(slots);
         bookingDetailsPanel.setEnabled(enabled);
 
-        for (int i = EventSwipeData.MAX_ENTRY_SLOTS - 1; i >= 0; i--) {
-            slotViews[i].enable(enabled && i < slots);
-        }
-
-        slot1Label.setText(slots > 1 ? "Slot one" : "Event details");
         checkingModeToggle1.setEnabled(enabled);
         checkingModeToggle1.setText(enabled ? checkingListsText :
                                               recordingAllText);
@@ -3848,7 +3383,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
 
     private boolean eventNotNull() {
         try {
-            Event e = app.getData().getEvents().get(0);
+            Event e = app.getData().getEvent();
             return !e.getId().isEmpty();
         } catch (NullPointerException ex) {
             return false;
@@ -3911,7 +3446,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
         else if (!isFileInput) {
             Slot slotView = this.getSlotView(input);
             isFileInput = (input == slotView.allComponents.get(Component.FILE));
-            isIdInput = (input == slotView.allComponents.get(Component.ID));
+            isIdInput = (input == entrySlotIdInput1);
         }
         if (isFileInput && input.getText().equals(cleanFile)) {
             input.setText(gained ? "" : fileInputDefault);
@@ -3933,7 +3468,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
                 showBrowserError();
             }
             else {
-                URI uri = null;
+                URI uri;
                 try {
                     uri = new URI(url);
                     desktop.browse(uri);
@@ -4038,20 +3573,10 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
     private javax.swing.JLabel entrySlotBookingListLabel5;
     private javax.swing.JFormattedTextField entrySlotDisplayTextField1;
     private javax.swing.JFormattedTextField entrySlotIdInput1;
-    private javax.swing.JFormattedTextField entrySlotIdInput2;
-    private javax.swing.JFormattedTextField entrySlotIdInput3;
-    private javax.swing.JFormattedTextField entrySlotIdInput4;
-    private javax.swing.JFormattedTextField entrySlotIdInput5;
     private javax.swing.JLabel entrySlotIdLabel1;
-    private javax.swing.JLabel entrySlotIdLabel2;
-    private javax.swing.JLabel entrySlotIdLabel3;
-    private javax.swing.JLabel entrySlotIdLabel4;
-    private javax.swing.JLabel entrySlotIdLabel5;
     private javax.swing.JLabel entrySlotLabel1;
     private javax.swing.JLabel entrySlotsLabel;
-    private javax.swing.JLabel entrySlotsLabel1;
     private javax.swing.JSpinner entrySlotsSpinnerOffline;
-    private javax.swing.JSpinner entrySlotsSpinnerOnline;
     private javax.swing.JLabel eventStatusAttendedLabel;
     private javax.swing.JTextField eventStatusAttendedNumber;
     private javax.swing.JLabel eventStatusBookedLabel;
@@ -4077,15 +3602,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
     private javax.swing.JLabel finishPanelTitle;
     private javax.swing.JCheckBox fixedLengthCheckbox;
     private javax.swing.JTextField generatedTitle1;
-    private javax.swing.JTextField generatedTitle2;
-    private javax.swing.JTextField generatedTitle3;
-    private javax.swing.JTextField generatedTitle4;
-    private javax.swing.JTextField generatedTitle5;
     private javax.swing.JLabel generatedTitleLabel1;
-    private javax.swing.JLabel generatedTitleLabel2;
-    private javax.swing.JLabel generatedTitleLabel3;
-    private javax.swing.JLabel generatedTitleLabel4;
-    private javax.swing.JLabel generatedTitleLabel5;
     private javax.swing.JLabel historyLabel;
     private javax.swing.JTextField hostInput;
     private javax.swing.JLabel hostLabel;
@@ -4096,10 +3613,6 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
     private javax.swing.JRadioButton lettersNumbersRadio;
     private javax.swing.JRadioButton lettersRadio;
     private javax.swing.JButton loadEventButton1;
-    private javax.swing.JButton loadEventButton2;
-    private javax.swing.JButton loadEventButton3;
-    private javax.swing.JButton loadEventButton4;
-    private javax.swing.JButton loadEventButton5;
     private javax.swing.JLabel loadWaitingListLabel;
     private javax.swing.JFormattedTextField localAttendeeCountTextField;
     private javax.swing.JButton logInButton;
@@ -4137,10 +3650,6 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
     private javax.swing.JMenuItem saveMenuItem;
     private javax.swing.JButton searchButton;
     private javax.swing.JButton searchEventsButton1;
-    private javax.swing.JButton searchEventsButton2;
-    private javax.swing.JButton searchEventsButton3;
-    private javax.swing.JButton searchEventsButton4;
-    private javax.swing.JButton searchEventsButton5;
     private javax.swing.JFormattedTextField searchInput;
     private javax.swing.JLabel searchInputLabel;
     private javax.swing.JButton settingsBackButton;
@@ -4149,14 +3658,6 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
     private javax.swing.JLabel settingsPanelTitle;
     private javax.swing.JPanel slot1DetailsPanel;
     private javax.swing.JLabel slot1Label;
-    private javax.swing.JPanel slot2DetailsPanel;
-    private javax.swing.JLabel slot2Label;
-    private javax.swing.JPanel slot3DtailsPanel;
-    private javax.swing.JLabel slot3Label;
-    private javax.swing.JPanel slot4DetailsPanel;
-    private javax.swing.JLabel slot4Label;
-    private javax.swing.JPanel slot5DetailsPanel;
-    private javax.swing.JLabel slot5Label;
     private javax.swing.JPanel slotsPanel;
     private javax.swing.JLabel smallLogoLabel;
     private javax.swing.JButton startCounterModeButton;
@@ -4224,8 +3725,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
 
     private boolean markEmptyFields(JTextField[] required) {
         boolean complete = true;
-        for (int i = 0; i < required.length; i++) {
-            JTextField r = required[i];
+        for (JTextField r : required) {
             if (r.getText().isEmpty() || r.getText().matches("^\\s+$")) {
                 markErrorField(r);
                 complete = false;
@@ -4290,47 +3790,12 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
             entrySlotBookingListFilePathInput4,
             entrySlotBookingListFilePathInput5
         };
-        JFormattedTextField[] idInputs = {
-            entrySlotIdInput1,
-            entrySlotIdInput2,
-            entrySlotIdInput3,
-            entrySlotIdInput4,
-            entrySlotIdInput5
-        };
         JButton[] browseButtons = {
             bookingListBrowseButton1,
             bookingListBrowseButton2,
             bookingListBrowseButton3,
             bookingListBrowseButton4,
             bookingListBrowseButton5
-        };
-        JButton[] loadEventButtons = {
-            loadEventButton1,
-            loadEventButton2,
-            loadEventButton3,
-            loadEventButton4,
-            loadEventButton5
-        };
-        JButton[] listEventButtons = {
-            searchEventsButton1,
-            searchEventsButton2,
-            searchEventsButton3,
-            searchEventsButton4,
-            searchEventsButton5
-        };
-        JTextField[] titleInputs = {
-            generatedTitle1,
-            generatedTitle2,
-            generatedTitle3,
-            generatedTitle4,
-            generatedTitle5
-        };
-        JLabel[] slotLabels = {
-            slot1Label,
-            slot2Label,
-            slot3Label,
-            slot4Label,
-            slot5Label
         };
         JLabel[] bookingListLabels = {
             entrySlotBookingListLabel1,
@@ -4340,9 +3805,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
             entrySlotBookingListLabel5
         };
         for (int i = 0; i < EventSwipeData.MAX_ENTRY_SLOTS; i++) {
-            slotViews[i] = new Slot(fileInputs[i], idInputs[i], browseButtons[i],
-                                    loadEventButtons[i], listEventButtons[i],
-                                    titleInputs[i], slotLabels[i], bookingListLabels[i]);
+            slotViews[i] = new Slot(fileInputs[i], browseButtons[i], bookingListLabels[i]);
         }
         waitListView = new WaitingListView(waitingListFilePathInput,
                                            waitingListBrowseButton,
@@ -4352,20 +3815,10 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
     private class Slot {
         Slot() {}
         Slot(JFormattedTextField f,
-             JFormattedTextField i,
                          JButton b,
-                         JButton l,
-                         JButton s,
-                      JTextField t,
-                        JLabel lab,
                         JLabel bLab) {
             allComponents.put(Component.FILE, f);
-            allComponents.put(Component.ID, i);
             allComponents.put(Component.BROWSE, b);
-            allComponents.put(Component.LOAD, l);
-            allComponents.put(Component.SEARCH, s);
-            allComponents.put(Component.TITLE, t);
-            allComponents.put(Component.LABEL, lab);
             allComponents.put(Component.BOOKINGLIST, bLab);
         }
 
@@ -4373,8 +3826,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
 
         void enable(Boolean e) {
             for (JComponent c : allComponents.values()) {
-                if(c != allComponents.get(Component.TITLE))
-                    c.setEnabled(e);
+                c.setEnabled(e);
             }
         }
         
@@ -4395,8 +3847,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
     }
 
     public enum Component {
-        FILE, ID, BROWSE, LOAD, SEARCH,
-        TITLE, LABEL, BOOKINGLIST
+        FILE, BROWSE, LABEL, BOOKINGLIST
     }
 
     private Slot[] slotViews = new Slot[EventSwipeData.MAX_ENTRY_SLOTS];

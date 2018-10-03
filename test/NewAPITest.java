@@ -27,9 +27,9 @@ public class NewAPITest {
     private static BookingSystemAPI api;
     private static EventSwipeApp app;
     private static EventSwipeData data;
-    private static String username = "eventswipe";
-    private static char[] password = {'m','i','k','e','t','i','l','e','y'};
-
+    private static final String USERNAME = "eventswipe";
+    private static final char[] PASSWORD = {'m','i','k','e','t','i','l','e','y'};
+    
     public NewAPITest() {}
 
     @BeforeClass
@@ -45,6 +45,7 @@ public class NewAPITest {
 
         data.setCustomProperties(pMap);
         api.init();
+        api.logIn(USERNAME, PASSWORD);
     }
 
     @AfterClass
@@ -57,16 +58,16 @@ public class NewAPITest {
     @After
     public void tearDown() {
     }
-
+    /*
     @Test
     public void apiLoginTest() throws Exception {
         try {
-            assert(api.logIn(username, password));
-        } catch (Exception ex) {
+            assert(api.logIn(USERNAME, PASSWORD));
+        } catch (IOException ex) {
             Logger.getLogger(CareerHubAPITest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    */
     @Test
     public void getTokenTest() {
         String token= "";
@@ -83,7 +84,7 @@ public class NewAPITest {
 
     @Test
     public void getEventsListTest() {
-        List<Event> events = new ArrayList<Event>();
+        List<Event> events = new ArrayList<>();
         try {
             events = api.getEventsList();
         } catch (MalformedURLException ex) {
@@ -99,7 +100,7 @@ public class NewAPITest {
     public void getEvent() {
         Event event = new Event();
         try {
-            event = api.getEvent("203802");
+            event = api.getEvent("203802", true);
         } catch (IOException ex) {
             Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -108,27 +109,32 @@ public class NewAPITest {
 
     @Test
     public void eventDateTest() {
-        Event aEvent = new Event();
-        Event iEvent = new Event();
+        Event gmtEvent = new Event();
+        Event bstEvent = new Event();
         try {
-            aEvent = api.getEvent("260975");
-            iEvent = api.getEvent("260972");
+            gmtEvent = api.getEvent("479656", false);
+            bstEvent = api.getEvent("203802", false);
         } catch (IOException ex) {
             Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("Active date: " + aEvent.getStartDate());
-        System.out.println("Active regs: " + aEvent.getRegStart());
-        System.out.println("Inactive date: " + iEvent.getStartDate());
-        System.out.println("Inactive regs: " + iEvent.getRegStart());
+        System.out.println("GMT date: " + gmtEvent.getStartDate());
+        System.out.println("GMT regs: " + gmtEvent.getRegStart());
+        System.out.println("BST date: " + bstEvent.getStartDate());
+        System.out.println("BST regs: " + bstEvent.getRegStart());
     }
 
     @Test
     public void earlyEntryTest() {
-        Event event = new Event();
+        try {
+            api.logIn(USERNAME, PASSWORD);
+       } catch (IOException ex) {
+            Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        }
+        Event event;
         Booking booking = new Booking("349154");
             try {
-                event = api.getEvent("203802");
-                event.setBookingList(api.getBookingList(event.getId()));
+                event = api.getEvent("203802", true);
                 System.out.println("Bookings: " + event.getBookingList().size());
                 Date now = new Date();
                 System.out.println("Now: " + now);
@@ -153,10 +159,44 @@ public class NewAPITest {
                     fail("Student shouldn't be marked early.");
                     booking.setStatus(Booking.EARLY_STATUS);
                 }
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
                 fail("Error setting up the event");
             }
+    }
+    
+    @Test
+    public void checkStatusTest() {
+        String eventKey = "203802";
+        Booking unspecified = null, attended = null, absent = null, not_booked = null;
+        try {
+            Event event = api.getEvent(eventKey, true);
+            attended = api.getBooking("123456", eventKey);
+            not_booked = api.getBooking("349154", eventKey);
+            Booking booking = event.getBookingList().get(0);
+            String bookingId = String.valueOf(booking.getBookingId());
+            String externalId = booking.getStuNumber();
+            api.markStatus(STATUS.ABSENT, bookingId, eventKey);
+            absent = api.getBooking(externalId, eventKey);
+            api.markStatus(STATUS.UNSPECIFIED, bookingId, eventKey);
+            unspecified = api.getBooking(externalId, eventKey);
+        } catch (IOException ex) {
+            Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        assert(attended.getStatus() == api.getATTENDED_STATUS());
+        assert(not_booked.getStatus() == api.getNOT_BOOKED_STATUS());
+        assert(absent.getStatus() == api.getABSENT_STATUS());
+        assert(unspecified.getStatus() == api.getUNSPECIFIED_STATUS());
+    }
+    
+    @Test
+    public void bookWithStuNumberTest() {
+        String eventKey = "539797";
+        try {
+            api.bookStudentWithStuNumber("349154", eventKey, "7352");
+        } catch (IOException ex) {
+            Logger.getLogger(NewAPITest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }

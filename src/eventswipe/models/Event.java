@@ -14,7 +14,10 @@ public class Event {
     /**
      * Default constructor for an event.
      */
-    public Event() { }
+    public Event() {
+        this.unsavedList = new ArrayList<>();
+        this.sessions = new ArrayList<>();
+    }
 
     /**
      * Constructs an event with a title, start date and unique identifier.
@@ -27,6 +30,8 @@ public class Event {
         this.title = title;
         this.startDateString = date;
         this.id = id;
+        this.unsavedList = new ArrayList<>();
+        this.sessions = new ArrayList<>();
     }
 
     /**
@@ -124,7 +129,7 @@ public class Event {
     public void setRegStart(Date regStart) {
         this.regStart = regStart;
     }
-
+    
     /**
      * @return A List of Bookings for the event
      * @see Booking
@@ -178,23 +183,6 @@ public class Event {
     }
 
     /**
-     * @return A List of student numbers of attendees who were too early to register for the event
-     */
-    public List<String> getEarlyList() {
-        return earlyList;
-    }
-
-    /**
-     * Sets the List of student numbers of attendees
-     * who were too early to register for the event.
-     *
-     * @param earlyList A List of student number Strings
-     */
-    public void setEarlyList(List<String> earlyList) {
-        this.earlyList = earlyList;
-    }
-
-    /**
      * @return The booking limit for the event
      */
     public int getBookingLimit() {
@@ -211,22 +199,6 @@ public class Event {
     }
 
     /**
-     * @return The slot of the event when taking attendance for a multi-slot event
-     */
-    public int getSlot() {
-        return slot;
-    }
-
-    /**
-     * Sets the slot of the event when taking attendance for a multi-slot event.
-     *
-     * @param slot The event slot
-     */
-    public void setSlot(int slot) {
-        this.slot = slot;
-    }
-
-    /**
      * @return The number of people who have attended the event
      */
     public int getAttendeeCount() {
@@ -240,6 +212,38 @@ public class Event {
      */
     public void setAttendeeCount(int attendeeCount) {
         this.attendeeCount = attendeeCount;
+    }
+    
+    /**
+     * @return The number of unspecified users booked onto the event
+     */
+    public int getUnspecifiedCount() {
+        return unspecifiedCount;
+    }
+
+    /**
+     * Sets the number of unspecified users booked onto the event
+     *
+     * @param unspecifiedCount The number bookings
+     */
+    public void setUnspecifiedCount(int unspecifiedCount) {
+        this.unspecifiedCount = unspecifiedCount;
+    }
+    
+    /**
+     * @return The number of people who have booked onto the event
+     */
+    public int getBookingCount() {
+        return bookingCount;
+    }
+
+    /**
+     * Sets the number of people who have booked onto the event.
+     *
+     * @param bookingCount The number bookings
+     */
+    public void setBookingCount(int bookingCount) {
+        this.bookingCount = bookingCount;
     }
 
     /**
@@ -268,10 +272,26 @@ public class Event {
     /**
      * Sets whether or not the event uses a booking list.
      *
-     * @param dropIn True is the event doesn't use a booking list, false if it does
+     * @param dropIn True if the event doesn't use a booking list, false if it does
      */
     public void setDropIn(boolean dropIn) {
         this.dropIn = dropIn;
+    }
+    
+    /**
+     * @return the event timeslot sessions
+     * @see Session
+     */
+    public List<Session> getSessions() {
+        return sessions;
+    }
+
+    /**
+     * @param sessions the event timeslot sessions to set
+     * @See session
+     */
+    public void setSessions(List<Session> sessions) {
+        this.sessions = sessions;
     }
 
     private String startDateString;
@@ -282,16 +302,18 @@ public class Event {
     private Date startDate;
     private Date regStart;
 
-    private List<Booking> bookingList;
     private List<Student> waitingList;
-    private List<String> unsavedList = new ArrayList<String>();
-    private List<String> earlyList = new ArrayList<String>();
+    private List<String> unsavedList;
+    private List<Booking> bookingList;
 
     private int bookingLimit;
-    private int slot;
     private int attendeeCount;
+    private int bookingCount;
+    private int unspecifiedCount;
 
     private boolean unlimited = false;
     private boolean dropIn = false;
-
+    
+    private List<Session> sessions;
+    
 }

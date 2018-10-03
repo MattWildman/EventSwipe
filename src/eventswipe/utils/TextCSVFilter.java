@@ -9,8 +9,8 @@ import javax.swing.filechooser.*;
  */
 public class TextCSVFilter extends FileFilter {
 
-    public final static String csv = "csv";
-    public final static String txt = "txt";
+    public final static String CSV = "csv";
+    public final static String TXT = "txt";
 
     @Override
     public boolean accept(File f) {
@@ -19,12 +19,8 @@ public class TextCSVFilter extends FileFilter {
         }
         String extension = getExtension(f);
         if (extension != null) {
-            if (extension.equals(txt) ||
-                extension.equals(csv)) {
-                    return true;
-            } else {
-                return false;
-            }
+            return extension.equals(TXT) ||
+                   extension.equals(CSV);
         }
         return false;
     }
