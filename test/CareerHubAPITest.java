@@ -1,4 +1,3 @@
-
 import java.util.Map;
 import java.util.HashMap;
 import eventswipe.EventSwipeData;
@@ -305,4 +304,19 @@ public class CareerHubAPITest {
             LOG.log(Level.SEVERE, null, ex);
         }
     }
+    
+    /**
+     * It is currently not possible to detect an error when marking status on CareerHub
+     *
+    @Test
+    public void t19_markAttendedErrorTest() {
+        boolean pass = false;
+        try {
+            api.markStatus(STATUS.ATTENDED, "0", "203802"); //should throw an error
+        } catch (IOException ioe) {
+            pass = true;
+        }
+        assertTrue(pass);
+    }
+    */
 }
