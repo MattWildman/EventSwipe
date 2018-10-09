@@ -2951,7 +2951,7 @@ private boolean logIn(JTextField uField, JPasswordField pField) {
         app.clearData();
         boolean useWaitingList = yesLoadWaitingListRadioButton.isSelected();
         app.setWaitingListFlag(false);
-        boolean configOK = false;
+        boolean configOK;
         String displayTitle = "";
 
         JFormattedTextField idInput = (JFormattedTextField) entrySlotIdInput1;

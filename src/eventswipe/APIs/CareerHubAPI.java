@@ -299,23 +299,18 @@ public class CareerHubAPI extends BookingSystemAPI {
     @Override
     public Booking bookStudentWithStuNumber(String externalId, String eventKey, String sessionId) throws IOException {
         String url = String.format(EVENT_BOOKING_URL_TEMPL, externalId, eventKey, sessionId);
+        Booking booking = new Booking(externalId);
         try {
             String response = HttpUtils.sendDataToURL(url, "POST", " ", charset, getAPIAuthHeaders());
             JSONObject jsonResponse = (JSONObject) new JSONObject(response);
-            Booking booking = new Booking(externalId);
             booking.setId(jsonResponse.getInt("jobSeekerId"));
+            booking.setBookingId(jsonResponse.getInt("bookingId"));
             booking.setStatus(this.getUNSPECIFIED_STATUS());
-        return booking;
         } catch (IOException ioe) {
             if (ioe.getMessage().startsWith("Server returned HTTP response code: 500 for URL:")) {
                 throw new EventFullException("Event is fully booked", externalId);
             }
         }
-        String response = HttpUtils.sendDataToURL(url, "POST", " ", charset, getAPIAuthHeaders());
-        JSONObject jsonResponse = (JSONObject) new JSONObject(response);
-        Booking booking = new Booking(externalId);
-        booking.setId(jsonResponse.getInt("jobSeekerId"));
-        booking.setStatus(this.getUNSPECIFIED_STATUS());
         return booking;
     }
 

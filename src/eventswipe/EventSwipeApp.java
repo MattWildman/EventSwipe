@@ -294,6 +294,7 @@ public class EventSwipeApp extends SingleFrameApplication {
                                 Booking newBooking = api.bookStudentWithStuNumber(stuNumberFin, event.getId(), s.getId());
                                 Integer newId = newBooking.getBookingId();
                                 bookingFin.setBookingId(newId);
+                                bookingFin.setSessionId(s.getId());
                                 recordAttendance(bookingFin);
                                 return;
                             } catch (EventFullException efe) {
