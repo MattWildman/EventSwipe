@@ -55,7 +55,8 @@ public class CareerHubAPI extends BookingSystemAPI {
         MARK_ABSENT_URL =      ADMIN_URL + "events/bookings/markabsent/";
         WAITING_LIST_BASE =    ADMIN_URL + "eventwaitinglist.aspx?id=";
         STUDENT_SEARCH_BASE =  ADMIN_URL + "suggest/JobSeeker";
-        EVENT_ADMIN_URL_BASE = ADMIN_URL + "event.aspx?id=";
+        
+        EVENT_ADMIN_URL_TEMPL = ADMIN_URL + "events/info/%s/booking-settings";
         
         EVENT_API_URL = HOST + "api/integrations/v1/events/";
         EVENT_BOOKING_URL_TEMPL = EVENT_API_URL + "bookings/%s/%s?sessionId=%s";
@@ -307,7 +308,7 @@ public class CareerHubAPI extends BookingSystemAPI {
             booking.setBookingId(jsonResponse.getInt("bookingId"));
             booking.setStatus(this.getUNSPECIFIED_STATUS());
         } catch (IOException ioe) {
-            if (ioe.getMessage().startsWith("Server returned HTTP response code: 500 for URL:")) {
+            if (ioe.getMessage().startsWith("Server returned HTTP response code: 409 for URL:")) {
                 throw new EventFullException("Event is fully booked", externalId);
             }
         }
@@ -483,7 +484,7 @@ public class CareerHubAPI extends BookingSystemAPI {
 
     @Override
     public String getAdminEventURL(String eventKey) {
-        return EVENT_ADMIN_URL_BASE + eventKey;
+        return String.format(EVENT_ADMIN_URL_TEMPL, eventKey);
     }
 
     @Override
@@ -575,7 +576,7 @@ public class CareerHubAPI extends BookingSystemAPI {
     public String EVENT_API_URL;
     public String EVENT_API_LIST_URL;
     public String EVENT_BOOKING_URL_TEMPL;
-    public String EVENT_ADMIN_URL_BASE;
+    public String EVENT_ADMIN_URL_TEMPL;
 
     private final String ACTIVE_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 

@@ -289,7 +289,7 @@ public class EventSwipeApp extends SingleFrameApplication {
                         Session s = event.getSessions().get(i);
                         Date now = new Date();
                         if ((now.compareTo(s.getStart()) >= 0 && now.compareTo(s.getEnd()) <= 0) || 
-                             i == event.getSessions().size() -1) {
+                             i == (event.getSessions().size()-1)) {
                             try {
                                 Booking newBooking = api.bookStudentWithStuNumber(stuNumberFin, event.getId(), s.getId());
                                 Integer newId = newBooking.getBookingId();
