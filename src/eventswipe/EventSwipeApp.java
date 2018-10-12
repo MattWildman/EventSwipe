@@ -239,14 +239,15 @@ public class EventSwipeApp extends SingleFrameApplication {
             }
             if (!booked && data.isWaitingListFlag()) {
                 if (!event.getWaitingList().isEmpty()) {
-                    for (Student student : event.getWaitingList()) {
+                    Integer studentId = api.getStudent(stuNumber).getId();
+                    for (Student waitingStudent : event.getWaitingList()) {
                         try {
-                            if (student.getStuNumber().equals(stuNumber)) {
+                            if (waitingStudent.getId().equals(studentId)) {
                                 waitingList = true;
                             }
                         } catch (NullPointerException np) {
                             System.err.println("Waiting list student " +
-                               student.getId() + " has no student number");
+                               waitingStudent.getId() + " has no student number");
                         }
                     }
                 }

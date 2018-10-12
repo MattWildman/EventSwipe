@@ -334,13 +334,15 @@ public class CareerHubAPI extends BookingSystemAPI {
         student.setStuNumber(externalId);
         if (!jsonStudent.isNull("FirstName")) {
             student.setFirstName(jsonStudent.getString("FirstName"));
-        } else {
+        } 
+        else {
             student.setFirstName("");
         }
       
         if (!jsonStudent.isNull("LastName")) {
             student.setLastName(jsonStudent.getString("LastName"));
-        } else {
+        } 
+        else {
             student.setLastName("");
         }
         
