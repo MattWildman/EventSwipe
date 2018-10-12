@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -2589,7 +2590,7 @@ private void loadEventButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
         try {
             event = app.getEvent(id);
             titleInput.setText(event.getTitle());
-        } catch (org.jsoup.HttpStatusException ex) {
+        } catch (FileNotFoundException ex) {
             Logger.getLogger(EventSwipeView.class.getName()).log(Level.WARNING, null, ex);
             app.getLogger().logException(ex);
             JOptionPane.showMessageDialog(app.getMainFrame(),
