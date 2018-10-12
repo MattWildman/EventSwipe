@@ -1,8 +1,11 @@
 package eventswipe.utils;
 
+import eventswipe.EventSwipeView;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -47,8 +50,8 @@ public class EventSwipeLogger {
             try (FileWriter fw = new FileWriter(logFile.getAbsoluteFile(), true)) {
                 fw.write(Utils.getDate("HH:mm:ss dd/MM/yyyy ") + message + NL);
             }
-        } catch (IOException e) {
-            System.err.println("Error: " + e.getMessage());
+        } catch (IOException | NullPointerException e) {
+            Logger.getLogger(EventSwipeView.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 

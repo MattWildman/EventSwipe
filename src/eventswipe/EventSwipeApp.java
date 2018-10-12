@@ -498,10 +498,7 @@ public class EventSwipeApp extends SingleFrameApplication {
         data.setSingleSlot(event.getSessions().size() == 1);
     }
 
-    public Event loadEvent(String eventKey, Boolean useWaitingList) throws MalformedURLException, IOException {
-//        Future<Response> response = executor.submit(new Request() {
-//            TODO: get event asyncly
-//        }); 
+    public Event loadEvent(String eventKey, Boolean useWaitingList) throws IOException {
         Event event = api.getEvent(eventKey, true);
         if(useWaitingList) {
             List<Student> waitingList = api.getWaitingList(eventKey);
